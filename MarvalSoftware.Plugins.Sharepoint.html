@@ -1708,6 +1708,168 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
                 },
+                _showInlineFolderInput(parentFolderId) {
+                    console.log("calliog inline fun")
+                    const self = this;
+
+                    // Find the parent folder element using data-item-id
+                    const parentElement = document.querySelector(`[data-item-id="${parentFolderId}"]`);
+                    if (!parentElement) return;
+
+                    // Check if there's already an input being shown
+                    const existingInput = parentElement.querySelector('.inline-folder-input');
+                    if (existingInput) {
+                        existingInput.focus();
+                        return;
+                    }
+
+                    // Create the inline input container with proper indentation
+                    const parentLevel = parseInt(parentElement.style.paddingLeft) || 0;
+                    const inputContainer = document.createElement('div');
+                    inputContainer.className = 'inline-folder-input tree-item';
+                    inputContainer.style.cssText = `
+        display: flex;
+        align-items: center;
+        padding-left: ${parentLevel + 20}px;
+        padding-right: 8px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        margin: 2px 0;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    `;
+
+                    // Create the input field
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = 'New folder name';
+                    input.style.cssText = `
+        flex: 1;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 14px;
+        padding: 2px 4px;
+    `;
+
+                    // Create confirm button (checkmark)
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.innerHTML = '✓'; // You can replace with your icons.check if you have one
+                    confirmBtn.title = 'Create folder';
+                    confirmBtn.style.cssText = `
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 4px 8px;
+        margin-left: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    `;
+
+                    // Create cancel button
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.innerHTML = '✕'; // You can replace with your icons.close if you have one
+                    cancelBtn.title = 'Cancel';
+                    cancelBtn.style.cssText = `
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 4px 8px;
+        margin-left: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    `;
+
+                    // Function to create the folder
+                    const createFolder = async () => {
+                        const folderName = input.value.trim();
+                        if (!folderName) {
+                            input.focus();
+                            return;
+                        }
+
+                        try {
+                            // Call your API or method to create the folder
+                            await self._createNewFolder(parentFolderId, folderName);
+
+                            // Remove the input container
+                            inputContainer.remove();
+
+                            // Refresh the folder contents or add the new folder to the UI
+                            await self._refreshFolderContents(parentFolderId);
+
+                        } catch (error) {
+                            console.error('Error creating folder:', error);
+                            // You might want to show an error message here
+                            input.style.borderColor = '#dc3545';
+                            input.focus();
+                        }
+                    };
+
+                    // Function to cancel folder creation
+                    const cancelCreation = () => {
+                        inputContainer.remove();
+                    };
+
+                    // Event listeners
+                    confirmBtn.addEventListener('click', createFolder);
+                    cancelBtn.addEventListener('click', cancelCreation);
+
+                    // Handle Enter and Escape keys
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            createFolder();
+                        } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            cancelCreation();
+                        }
+                    });
+
+                    // Click outside to cancel
+                    const handleClickOutside = (e) => {
+                        if (!inputContainer.contains(e.target)) {
+                            cancelCreation();
+                            document.removeEventListener('click', handleClickOutside);
+                        }
+                    };
+
+                    // Add elements to container
+                    inputContainer.appendChild(input);
+                    inputContainer.appendChild(confirmBtn);
+                    inputContainer.appendChild(cancelBtn);
+
+                    // Find where to insert the input - after the current tree item
+                    // Look for the next sibling that has a deeper or equal padding level to insert before it
+                    let insertAfter = parentElement;
+                    let nextSibling = parentElement.nextElementSibling;
+
+                    // If the folder is expanded, find where the children end
+                    if (expandedFolders.has(parentFolderId) && nextSibling) {
+                        const parentLevel = parseInt(parentElement.style.paddingLeft) || 0;
+
+                        // Skip over all child elements (they will have more padding)
+                        while (nextSibling && parseInt(nextSibling.style.paddingLeft || 0) > parentLevel) {
+                            insertAfter = nextSibling;
+                            nextSibling = nextSibling.nextElementSibling;
+                        }
+                    }
+
+                    // Insert the input container after the determined position
+                    insertAfter.insertAdjacentElement('afterend', inputContainer);
+
+                    // Focus the input and select all text
+                    input.focus();
+
+                    // Add click outside listener after a short delay to prevent immediate trigger
+                    setTimeout(() => {
+                        document.addEventListener('click', handleClickOutside);
+                    }, 100);
+                },
+
                 _fetchSharePointSites: async function() {
             //Sharepoint._getAuth();
             console.log("we are calling fetchsharepointsites");
@@ -1923,13 +2085,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                 _renderElement: function () {
                     
-
                     var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
                     var template = document.querySelector("template").content;
                     this._element = window.top.document.importNode(template, true);
-                    //this._uploadMessage = this._element.querySelector("#uploadFile");
-                    //this._foldersElement = this._element.querySelector("#foldersDropdown");
-                    //eventManager.addHandler(this.folderSelected, "input", this._, this);
 
                     this._uploadButton = this._element.querySelector("#uploadAll");
                     if (this._uploadButton) {
@@ -1939,21 +2097,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         
                     , this); //should be uploading all now
                     
-
-                    // this._body = this._element.querySelector("textarea");
                     this._cards = this._element.querySelector(".cards");
-                    //this._trimWhiteSpaces(this._body);
-                    //var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
-                    //this._sendMessageButton = this._element.querySelector("#sendMessage");
-                    //eventManager.addHandler(this._sendMessageButton, "click", this._postMessage, this);
+
                     this._createElement = this._element.querySelector(".action-buttons > button");
                     this._refreshLink = this._element.querySelector("a");
-
-                    //this.messageInput = this._element.querySelector("#message");
-                    //eventManager.addHandler(this.messageInput, "input", this._updateButtonVisual, this);
-
-                    //this.groupSelected = this._element.querySelector("#groupsDropdown");
-                    //eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
 
                     this.folderBtn = this._element.querySelector("#createFolder");
                     eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
@@ -1968,13 +2115,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("we should be calling get all folders twice and getting the response ");
 
                     }, this); //should be appending all folders now
-                    //let creating = browser.windows.create(
-                    //    //createData            // optional object
-                    //)
-
-
-                    //this.expandButton = this._element.querySelector("#expand-button2");
-                    //eventManager.addHandler(this.expandButton, "click", this._toggleFolder(), this);
 
                     this.appendChild(this._element);
                 },
@@ -2745,25 +2885,89 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     } else {
                         // Expand/collapse button
                         
-                        const createBtn = document.createElement('button');
-                        createBtn.className = 'expand-button2';
-                        createBtn.innerHTML =  icons.plus; // You can replace with an icon if desired
-                        createBtn.title = "Create new folder";
+                        let createBtn = document.createElement("button");
+                        createBtn.textContent = "+";
+                        createBtn.classList.add("mini-create-btn");
 
-                        createBtn.addEventListener('click', async (e) => {
+                        createBtn.addEventListener("click", (e) => {
                             e.preventDefault();
                             e.stopPropagation();
 
-                            // Expand folder if not expanded
-                            if (!expandedFolders.has(item.id)) {
-                                await self._toggleFolder(item.id, createBtn, e);
-                            }
+                            let parentItem = e.currentTarget.parentElement.parentElement; // Get the tree-item div
+                            let parentId = parentItem?.dataset.itemId;
 
-                            // Add inline input for folder creation
-                            //self._showInlineFolderInput(item.id);
+                            // Only append if input doesn't already exist
+                            if (!parentItem.querySelector(".new-folder-input")) {
+                                let newDiv = document.createElement("div");
+                                newDiv.classList.add("tree-item", "editing");
+                                newDiv.style.paddingLeft = `${(level + 1) * 20 + 8}px`; // Indent one level deeper
+
+                                let input = document.createElement("input");
+                                input.classList.add("new-folder-input");
+                                input.placeholder = "New folder name";
+
+                                let confirm = document.createElement("button");
+                                confirm.textContent = "✔";
+                                confirm.onclick = () => {
+                                    let name = input.value.trim();
+                                    if (name) {
+                                        const newId = `folder_${Date.now()}`;
+                                        const newFolder = {
+                                            id: newId,
+                                            name: name, // Use the actual input value
+                                            parentId: parentId,
+                                            children: [],
+                                        };
+
+                                        // Register it in the folder data structure
+                                        if (!folderData[newId]) {
+                                            folderData[newId] = newFolder;
+                                        }
+
+                                        // Add to parent's children array
+                                        if (!folderData[parentId]) {
+                                            folderData[parentId] = { children: [] };
+                                        }
+                                        if (!folderData[parentId].children) {
+                                            folderData[parentId].children = [];
+                                        }
+                                        folderData[parentId].children.push(newFolder); // Push the folder object, not just ID
+
+                                        // Remove the input div
+                                        newDiv.remove();
+
+                                        // Re-render the tree or just the parent's children
+                                        if (typeof self._renderTree === 'function') {
+                                            self._renderTree();
+                                        } else {
+                                            // Alternative: re-render just this section
+                                            renderChildren(parentId);
+                                        }
+                                    }
+                                };
+
+                                let cancel = document.createElement("button");
+                                cancel.textContent = "✖";
+                                cancel.onclick = () => {
+                                    newDiv.remove();
+                                };
+
+                                newDiv.appendChild(input);
+                                newDiv.appendChild(confirm);
+                                newDiv.appendChild(cancel);
+
+                                // Insert the new folder input right after the parent item
+                                parentItem.insertAdjacentElement('afterend', newDiv);
+
+                                // Focus the input
+                                input.focus();
+                            }
                         });
 
                         controlsDiv.appendChild(createBtn);
+
+
+
                         const expandBtn = document.createElement('button');
                         expandBtn.className = 'expand-button2';
                         expandBtn.innerHTML = icons.chevronRight;
@@ -3556,6 +3760,42 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._hideSpinner();
 
                 },
+                _createNewFolder(parentId) {
+                    const newId = `folder_${Date.now()}`;
+                    const newFolder = {
+                        id: newId,
+                        name: 'New Folder',
+                        parentId: parentId,
+                        children: [],
+                    };
+
+                    // Register it in your folder data structure
+                    this.folderData[newId] = newFolder;
+
+                    // Add to parent
+                    if (!this.folderData[parentId].children) this.folderData[parentId].children = [];
+                    this.folderData[parentId].children.push(newId);
+
+                    // Mark parent expanded
+                    this.folderData[parentId].expanded = true;
+
+                    // Optional: track editing state
+                    this.editingFolder = newId;
+                    this.editingName = newFolder.name;
+
+                    // Re-render
+                    this.render();
+
+                    // Focus the new input
+                    setTimeout(() => {
+                        const input = document.querySelector(`[data-folder-id="${newId}"] input`);
+                        if (input) {
+                            input.focus();
+                            input.select();
+                        }
+                    }, 0);
+                },
+
 
                 _getAllPages: function (sender, e) {
                     $.ajax({
