@@ -2510,6 +2510,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     .fadeOut("slow");
                             }
                         }
+                        checkedBoxes.each(function () {
+                            $(this).prop("checked", false);
+                        });
+                        notesBoxes.each(function () {
+                            $(this).prop("checked", false);
+                        });
+                        emailBoxes.each(function () {
+                            $(this).prop("checked", false);
+                        });
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createUploadNote&reqId=" + reqId;
                         let res = fetch(url, {
                             method: "POST",
@@ -2526,6 +2535,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("Uploaded: successfully");
 
 
+
                     } catch (ex) {
                         console.error("Upload error for", attachmentName, ex);
                         $("#successMessage")
@@ -2535,24 +2545,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             .fadeOut("slow");
                     }
 
-                    alert("Upload complete.");
-
-                    $("#attachmentsDiv input[type='checkbox']").prop("checked", false);
-                    $("#notesDiv input[type='checkbox']").prop("checked", false);
-                    $("#emailsDiv input[type='checkbox']").prop("checked", false);
-
-                    //let checkedBoxes = $("#attachmentsDiv input[type='checkbox']:checked");
-                    checkedBoxes.forEach((checkbox => {
-                        checkbox.prop("checked", false);
-                    }))
-                    notesBoxes.forEach((checkbox => {
-                        checkbox.prop("checked", false);
-                    }))
-                    emailBoxes.forEach((checkbox => {
-                        checkbox.prop("checked", false);
-                    }))
-                    //let notesBoxes = $("#notesDiv input[type='checkbox']:checked");
-                    //let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
+                   
                 },
 
 
