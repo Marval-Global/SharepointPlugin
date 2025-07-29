@@ -2,7 +2,7 @@
 <script type="text/javascript" src="template.js"></script>
 <template>
     <style>
-/*        * {
+        /*        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -18,8 +18,8 @@
 
         .body {
             max-width: 900px;*/
-/*            margin: 0 auto;*/
-            /*background: rgba(255, 255, 255, 0.95);
+        /*            margin: 0 auto;*/
+        /*background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 12px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -267,7 +267,7 @@
         }
 
         /* Upload Button */
-        #combineNotesBox,#uploadButtonTwo {
+        #combineNotesBox, #uploadButtonTwo {
             height: 40px;
             background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
             background-size: 300% 300%;
@@ -360,7 +360,7 @@
             border-bottom: 1px solid #ccc;
             font-family: Arial, sans-serif;
         }*/
-/*        #attachmentsDiv{
+        /*        #attachmentsDiv{
             display:flex;
         }*/
         #itemsDiv {
@@ -372,17 +372,17 @@
             max-height: 100%;
             overflow: auto; /* adds scrollbars if content overflows */
             box-sizing: border-box; /* ensures padding doesn't overflow container */
-            margin:15px;
-            padding:20px;
+            margin: 15px;
+            padding: 20px;
         }
 
 
         /*#notesDiv,
         #attachmentsDiv, #emailsDiv {
             flex: 1;*/ /* Make them grow equally */
-            /*min-width: 0;*/ /* Prevent overflow if needed */
-            /*border: 1px solid #ccc;*/ /* Optional: visual separation */
-            /*padding: 8px;
+        /*min-width: 0;*/ /* Prevent overflow if needed */
+        /*border: 1px solid #ccc;*/ /* Optional: visual separation */
+        /*padding: 8px;
             box-sizing: border-box;
             border-radius:25px;
             margin:10px;
@@ -399,10 +399,12 @@
             border: 1px solid #e5e7eb;
             overflow: hidden;
         }
+
         .folder-icon.selected,
-.folder-icon.selected path {
-    fill: #22c55e !important;
-}
+        .folder-icon.selected path {
+            fill: #22c55e !important;
+        }
+
         .header {
             border-bottom: 1px solid #e5e7eb;
             padding: 16px !important;
@@ -466,7 +468,7 @@
             cursor: pointer;
             border-radius: 4px;
             transition: background-color 0.2s;
-            padding:0;
+            padding: 0;
         }
 
             .expand-button2:hover {
@@ -479,12 +481,13 @@
             fill: #6b7280 !important;
             transition: transform 0.2s !important;
         }
+
         .plus-icon {
             width: 12px !important;
             height: 12px !important;
             fill: #6b7280 !important;
             transition: transform 0.2s !important;
-            color:gray;
+            color: gray;
         }
 
         .chevron.expanded {
@@ -624,7 +627,7 @@
             border-radius: 10px;
         }
 
-        
+
 
         #message {
             vertical-align: top;
@@ -686,7 +689,7 @@
                                 visibility: hidden;
                                 width: 120px;
                                 background-color: #555;
-/*                                color: #fff;*/
+                                /*                                color: #fff;*/
                                 text-align: center;
                                 border-radius: 6px;
                                 padding: 5px 0;
@@ -833,11 +836,11 @@
     <div id="successMessage">Success Message</div>
 
 
-  
 
-    
 
-    
+
+
+
     <div id="selectedFolder">Current Folder Path</div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
 
@@ -1034,23 +1037,23 @@
                 _attachmentName: null,
                 _microsoftToken: null,
                 _currentPath: null,
-                _prevId:null,
+                _prevId: null,
                 _currentSelectedFolderId: null,
                 _requestAcronym: null,
-                _requestNumber:null,
+                _requestNumber: null,
 
-               // Sharepoint: null,
+                // Sharepoint: null,
 
 
 
 
                 init: function () {
-                    
+
                     var requestNumber = $("#ctl00_cph_requestNumber").val();
                     var requestAcronym = $("#ctl00_cph_requestTypeAcronym").text();
                     this._requestAcronym = requestAcronym;
                     this._requestNumber = requestNumber;
-                    
+
                     //const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
 
                     //const customAttribute = await(await fetch(customAttributeUrl)).text();
@@ -1200,7 +1203,7 @@
 /* 🗂️  Content card -------------------------------------------------------- */
 .modal-content {
   width: min(600px, 90%);
-  
+
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,.25);
   padding: 2.5rem 2.25rem;
@@ -1445,7 +1448,7 @@
                             Sharepoint._attachmentName = $row.attr("title");
                             Sharepoint._popup(eventTarget);
                             //fetchSharePointSites();
-                            
+
                             //alert(`Clicked row ${index + 1}`);
                             //Sharepoint._rowIndex = index;
                         });
@@ -1537,7 +1540,7 @@
                         //Sharepoint._getAuth();
                         console.log("we are calling fetchsharepointsites");
                         let apptoken = await getMicrosoftAccessToken();
-                       //console.log("apptoken is:", apptoken);
+                        //console.log("apptoken is:", apptoken);
                         try {
                             //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
@@ -1578,7 +1581,7 @@
                         }
                     }
 
-                    
+
 
 
                     function addIconColumnFirst(imageSrc, onClickCallback) {
@@ -1832,51 +1835,51 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }, 100);
                 },
 
-                _fetchSharePointSites: async function() {
-            //Sharepoint._getAuth();
-            console.log("we are calling fetchsharepointsites");
+                _fetchSharePointSites: async function () {
+                    //Sharepoint._getAuth();
+                    console.log("we are calling fetchsharepointsites");
                     //let apptoken = await getMicrosoftAccessToken();
                     let apptoken = await this._getMicrosoftAccessToken2();
-            //console.log("apptoken is:", apptoken);
-            try {
-                //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
+                    //console.log("apptoken is:", apptoken);
+                    try {
+                        //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
-                //  console.log("apptoken is:", apptoken);
-                const response = await fetch(_fullPluginPathHandler + "?endpoint=getSites", {
-                    method: "POST",
-                    "headers": [["content-type", "application/json"]],
-                    body: JSON.stringify({
-                        "apptoken": apptoken,
-                        endpoint: "getSites"
-                    })
-                    // headers:{'apptoken':apptoken}
+                        //  console.log("apptoken is:", apptoken);
+                        const response = await fetch(_fullPluginPathHandler + "?endpoint=getSites", {
+                            method: "POST",
+                            "headers": [["content-type", "application/json"]],
+                            body: JSON.stringify({
+                                "apptoken": apptoken,
+                                endpoint: "getSites"
+                            })
+                            // headers:{'apptoken':apptoken}
 
-                });
-                let sitesJson = await response.json()
+                        });
+                        let sitesJson = await response.json()
 
-        console.log("Sharepoint sites are: ", sitesJson);
+                        console.log("Sharepoint sites are: ", sitesJson);
 
-                console.log("we should be appending sites now");
-                let $dropdown = $('#sitesDropdown');
-                if($dropdown) {
-                    console.log("sites dropdown does exist");
-                }
-        $dropdown.empty();
-                $dropdown.append('<option value = "">Please Select A Website To Upload</option>');
+                        console.log("we should be appending sites now");
+                        let $dropdown = $('#sitesDropdown');
+                        if ($dropdown) {
+                            console.log("sites dropdown does exist");
+                        }
+                        $dropdown.empty();
+                        $dropdown.append('<option value = "">Please Select A Website To Upload</option>');
 
-                sitesJson.value.forEach(site => {
-                    //console.log("site here is", site);
-                    $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
-                });
-                console.log("appending should finish!");
+                        sitesJson.value.forEach(site => {
+                            //console.log("site here is", site);
+                            $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
+                        });
+                        console.log("appending should finish!");
 
-        ; //in theory should have all our sites if response is correct
+                        ; //in theory should have all our sites if response is correct
 
 
-    } catch (error) {
-        console.log("Error fetching sites: ", error);
-    }
-},
+                    } catch (error) {
+                        console.log("Error fetching sites: ", error);
+                    }
+                },
                 _getAuth: async function () {
 
                     let hostString = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ChatbotHostOverride")).text()
@@ -2013,45 +2016,45 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 //    }
                 //},
 
-                _getMicrosoftAccessToken2 : async function() {
-            try {
-                // Get the Client ID from your SharePoint handler or hardcode it here
-                const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
-                console.log("clientIdUrl")
+                _getMicrosoftAccessToken2: async function () {
+                    try {
+                        // Get the Client ID from your SharePoint handler or hardcode it here
+                        const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
+                        console.log("clientIdUrl")
 
-                const clientId = await(await fetch(clientIdUrl)).text();
-                console.log("client id is:", clientId);
+                        const clientId = await (await fetch(clientIdUrl)).text();
+                        console.log("client id is:", clientId);
 
-                const msalInstance = await msal.createStandardPublicClientApplication({
-                    auth: {
-                        clientId: clientId,
-                        authority: "https://login.microsoftonline.com/common"
+                        const msalInstance = await msal.createStandardPublicClientApplication({
+                            auth: {
+                                clientId: clientId,
+                                authority: "https://login.microsoftonline.com/common"
+                            }
+                        });
+
+                        const loginRequest = {
+                            scopes: ["https://graph.microsoft.com/.default"]
+                        };
+
+                        const response = await msalInstance.loginPopup(loginRequest);
+
+                        console.log("Logged in successfully, access token:", response.accessToken);
+                        Sharepoint._microsoftToken = response.accessToken;
+                        return response.accessToken;
+
+                    } catch (err) {
+                        console.error("MSAL login failed:", err);
+                        throw err;
                     }
-                });
-
-                const loginRequest = {
-                    scopes: ["https://graph.microsoft.com/.default"]
-                };
-
-                const response = await msalInstance.loginPopup(loginRequest);
-
-                console.log("Logged in successfully, access token:", response.accessToken);
-                Sharepoint._microsoftToken = response.accessToken;
-                return response.accessToken;
-
-            } catch(err) {
-                console.error("MSAL login failed:", err);
-                throw err;
-            }
-        },
+                },
 
                 _renderElement: function () {
-                    
+
                     var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
                     var template = document.querySelector("template").content;
                     this._element = window.top.document.importNode(template, true);
 
-                    
+
                     this._cards = this._element.querySelector(".cards");
 
                     this._createElement = this._element.querySelector(".action-buttons > button");
@@ -2086,8 +2089,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 }, _getAllNotes: async function (sender, e) {
                     //preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown"); // need table
-                    
-                    
+
+
 
                     try {
                         console.log(" getting all attachments ");
@@ -2169,7 +2172,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                             // Append container to notes div
 
-                            notesDiv.appendChild(container); 
+                            notesDiv.appendChild(container);
 
                         });
 
@@ -2186,7 +2189,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     try {
                         console.log(" getting all attachments ");
-                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;                 
+                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAllAttachments&reqId=" + reqId;
                         console.log("we are going to this attachment url ", url)
 
@@ -2279,7 +2282,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         return;
                     }
 
-                    
+
                     //let folderPath = folderPaths[Sharepoint._currentSelectedFolderId] || "";
                     let folderPath = this._currentPath;
                     console.log("folder path in upallat ius ", folderPath);
@@ -2366,13 +2369,19 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                             console.log("combined content is ", combinedContent);
                             let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadCombinedNotes&reqId=" + reqId;
+                            let customAttribute = await Sharepoint._getAllCustomAttributeValue();
+
+                            console.log("custom att is ", customAttribute);
+                            if (customAttribute === null) {
+                                customAttribute = "";
+                            }
 
                             let payload = {
                                 microsoftToken: Sharepoint._microsoftToken,
                                 siteId: siteId,
                                 folderId: folderPath,
                                 combinedText: combinedContent,
-                                attachmentName: "Request "+reqId + " CombinedNotes.txt" //should probably make this changable for the user
+                                attachmentName: Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute + " Combined Notes.txt"//we will use .trim after to condense it //should probably make this changable for the user
                             };
 
                             try {
@@ -2528,7 +2537,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     alert("Upload complete.");
                 },
 
-                
+
                 _getAttachment: async function (sender, e, identifier = null) {
                     e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
@@ -2609,8 +2618,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             // Create a new DOM row with a checkbox + data attributes
                             let customRow = $(`
     <div class="email-row">
-        <input 
-            type="checkbox" 
+        <input
+            type="checkbox"
             class="email-checkbox"
             data-date="${messageDate}"
             data-address="${address}"
@@ -2703,7 +2712,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
                 },
                 _createFolder: async function (name = null) {
-                   /// e.preventDefault(); //prevent default everytime
+                    /// e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
                     //let foldersDropdown = $("#foldersDropdown");
                     let folderName;
@@ -2712,14 +2721,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     //const customAttribute = await (await fetch(customAttributeUrl)).text();
                     let customAttribute = await Sharepoint._getAllCustomAttributeValue();
-                    
+
                     console.log("custom att is ", customAttribute);
                     if (customAttribute === null) {
                         customAttribute = "";
                     }
                     console.log("we are getting here 2717");
                     if (name === null || name === "") {
-                        folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute; //we will use .trim after to condense it
+                        folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute; //we will use .trim after to condense it
                     } else {
                         folderName = name;
                     }
@@ -2731,11 +2740,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         console.log("creating folder with current path ", Sharepoint._currentPath);
-                        
+
                         //let name2 = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
 
 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + folderName.trim() + "&ReqId "+ reqId;
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + folderName.trim() + "&ReqId " + reqId;
                         console.log("we are going to this create url ", url);
                         //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
@@ -2760,14 +2769,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 .text("Error did not create folder")
                                 .fadeIn("slow")      // Fade in
                                 .delay(2000)         // Wait 2 seconds
-                                .fadeOut("slow"); 
+                                .fadeOut("slow");
                         }
 
                         $("#successMessage")
                             .text("Successfully created folder")
                             .fadeIn("slow")      // Fade in
                             .delay(2000)         // Wait 2 seconds
-                            .fadeOut("slow"); 
+                            .fadeOut("slow");
 
                         const attachment = await result.json();
                         console.log("attachment feedback", attachment);
@@ -2780,16 +2789,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             .text("error did not create folder")
                             .fadeIn("slow")      // Fade in
                             .delay(2000)         // Wait 2 seconds
-                            .fadeOut("slow"); 
+                            .fadeOut("slow");
                         console.error("we have error", ex);
                     }
 
-                }, _formatDate: function (dateString)
-                {
-            if(!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        },
+                }, _formatDate: function (dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                },
 
                 _fetchChildren: async function (folderId) {
                     // Use the path from the map, which is set in _renderChildren
@@ -2812,8 +2820,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     };
                 },
 
-    
-        //function createTreeItem(item, level = 0) 
+
+                //function createTreeItem(item, level = 0)
                 _createTreeItem: function (item, level) {
                     //console.log("we are at create tree item");
                     const self = this;
@@ -2838,7 +2846,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         controlsDiv.innerHTML = icons.spinner;
                     } else {
                         // Expand/collapse button
-                        
+
                         let createBtn = document.createElement("button");
                         createBtn.textContent = "+";
                         createBtn.classList.add("mini-create-btn");
@@ -2957,7 +2965,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             self._toggleFolder(item.id, expandBtn, e);//toggle folder onclick
                         });
                         controlsDiv.appendChild(expandBtn);
-                        
+
                     }
 
                     // Folder icon
@@ -3113,29 +3121,29 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     return null;
                 },
 
-        // Render children of a folder
+                // Render children of a folder
                 _renderChildren: function (folderId) {
                     //console.log("we are rendering children now");
-            const children = folderData[folderId];
-            if (!children || children.length === 0) return;
+                    const children = folderData[folderId];
+                    if (!children || children.length === 0) return;
 
                     const parentElement = window.top.document.querySelector(`[data-item-id="${folderId}"]`);
                     console.log("Parent element for", folderId, parentElement);
-            if (!parentElement) return;
+                    if (!parentElement) return;
 
-            // Remove existing children container
-            const existingContainer = window.top.document.querySelector(`[data-children-of="${folderId}"]`);
-            if (existingContainer) {
-                existingContainer.remove();
-            }
+                    // Remove existing children container
+                    const existingContainer = window.top.document.querySelector(`[data-children-of="${folderId}"]`);
+                    if (existingContainer) {
+                        existingContainer.remove();
+                    }
 
-            // Create new children container
-            const childrenContainer = document.createElement('div');
-            childrenContainer.className = 'children';
-            childrenContainer.dataset.childrenOf = folderId;
+                    // Create new children container
+                    const childrenContainer = document.createElement('div');
+                    childrenContainer.className = 'children';
+                    childrenContainer.dataset.childrenOf = folderId;
 
-            // Calculate level
-            const parentLevel = parseInt(parentElement.style.paddingLeft) / 20 - 0.4;
+                    // Calculate level
+                    const parentLevel = parseInt(parentElement.style.paddingLeft) / 20 - 0.4;
                     const childLevel = parentLevel + 1;
 
                     const parentPath = folderPaths[folderId] || "";
@@ -3143,18 +3151,18 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
                     // Add child items
-            console.log("childeren is ", children)
+                    console.log("childeren is ", children)
                     children.forEach(child => {
                         folderPaths[child.id] = parentPath ? parentPath + "/" + child.name : child.name;
                         console.log("this childs path is ", folderPaths[child.id], " with id of ", child.id)
 
-                const childElement = Sharepoint._createTreeItem(child, childLevel);
-                childrenContainer.appendChild(childElement);
-            });
+                        const childElement = Sharepoint._createTreeItem(child, childLevel);
+                        childrenContainer.appendChild(childElement);
+                    });
 
-            // Insert after parent
-            parentElement.insertAdjacentElement('afterend', childrenContainer);
-        },
+                    // Insert after parent
+                    parentElement.insertAdjacentElement('afterend', childrenContainer);
+                },
 
                 _renderTree: async function () {
                     const container = window.top.document.getElementById('treeContent');
@@ -3174,7 +3182,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (foldersJson && foldersJson.value && Array.isArray(foldersJson.value)) {
                         // Only show items that are folders (have a .folder property)
                         folderData['root'] = foldersJson.value.filter(item => item.folder);//remember to add root folders to folder data
-                        
+
                         foldersJson.value
                             .filter(item => item.folder) // Only folders
                             .forEach(item => {
@@ -3205,11 +3213,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
                 },
 
-        // Initialize the tree
-        //renderTree();
+                // Initialize the tree
+                //renderTree();
 
-        // Make toggleFolder available globally
-        //window.toggleFolder = toggleFolder;
+                // Make toggleFolder available globally
+                //window.toggleFolder = toggleFolder;
 
                 _popup: function (eventTarget) {
                     console.log(eventTarget);
@@ -3349,7 +3357,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }
 
                         );
-               
+
                         //})
                         this._attachmentsWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
@@ -3383,8 +3391,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (!this._pluginWindow.isVisible()) {
                         this._pluginWindow.centerToViewport();
                     }
-           
-                   this._attachmentsWindow.centerToViewport();
+
+                    this._attachmentsWindow.centerToViewport();
 
                     this._pluginWindow.show();
                     this._attachmentsWindow.show();
@@ -3395,8 +3403,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._getAllNotes();
                     this._getAllAttachments();
 
-                   
-                    
+
+
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
                 },
