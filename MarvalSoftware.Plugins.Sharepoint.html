@@ -26,7 +26,14 @@
             overflow: hidden;
             animation: fadeInUp 0.8s ease-out;*/
 
-       
+        #sitesDropdown {
+            width: 50%;
+            height: 50px;
+            margin: auto;
+            border: 3px solid #32C0F0;
+            padding: 10px;
+            display: block;
+        }
 
         #content {
             background: #f5f5f5;
@@ -580,9 +587,6 @@
             /*            height:500px !important;*/
         }
 
-        #uploadAll {
-            cursor: pointer;
-        }
 
         .messageButton {
             background-color: #8c9097;
@@ -620,9 +624,7 @@
             border-radius: 10px;
         }
 
-        .itemsTable {
-            display: flex;
-        }
+        
 
         #message {
             vertical-align: top;
@@ -831,52 +833,12 @@
     <div id="successMessage">Success Message</div>
 
 
-    <!--<button id="uploadFile">upload</button>-->
-    <button id="createFolder">Create Folder!</button>
-    <!--<button id="testButton">test button</button>-->
+  
 
-    <div class="itemsTable">
-        <table id="notesTable" border="1" style="margin-top: 10px; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center;">(Empty)</td>
-                </tr>
-            </tbody>
-        </table>
+    
 
-        <table id="itemsTable" border="1" style="margin-top: 10px; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Attachments</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center;">(Empty)</td>
-                </tr>
-            </tbody>
-        </table>
-        <table id="emailsTable" border="1" style="margin-top: 10px; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Emails</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center;">(Empty)</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <button id="uploadAll">Upload All Attachments</button>
-    <div id="selectedFolder">Example</div>
+    
+    <div id="selectedFolder">Current Folder Path</div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
 
 
@@ -1600,7 +1562,7 @@
                                 console.log("sites dropdown does exist");
                             }
                             $dropdown.empty();
-                            $dropdown.append('<option value = "">-- Select a Site --</option>');
+                            $dropdown.append('<option value = "">Please Select A Website To Upload </option>');
 
                             sitesJson.value.forEach(site => {
                                 //console.log("site here is", site);
@@ -1900,7 +1862,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log("sites dropdown does exist");
                 }
         $dropdown.empty();
-                $dropdown.append('<option value = "">-- Select a Site --</option>');
+                $dropdown.append('<option value = "">Please Select A Website To Upload</option>');
 
                 sitesJson.value.forEach(site => {
                     //console.log("site here is", site);
@@ -2089,21 +2051,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     var template = document.querySelector("template").content;
                     this._element = window.top.document.importNode(template, true);
 
-                    this._uploadButton = this._element.querySelector("#uploadAll");
-                    if (this._uploadButton) {
-                        console.log("upload all button does exist");
-                    }
-                    eventManager.addHandler(this._uploadButton, "click", this._uploadAllAttachments
-                        
-                    , this); //should be uploading all now
                     
                     this._cards = this._element.querySelector(".cards");
 
                     this._createElement = this._element.querySelector(".action-buttons > button");
                     this._refreshLink = this._element.querySelector("a");
 
-                    this.folderBtn = this._element.querySelector("#createFolder");
-                    eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
+                    //this.folderBtn = this._element.querySelector("#createFolder");
+                    //eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
 
                     this.siteSelected = this._element.querySelector("#sitesDropdown");
                     eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
@@ -2131,7 +2086,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 }, _getAllNotes: async function (sender, e) {
                     //preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown"); // need table
-                    let notesTable = $("#notesTable tbody");
+                    
                     
 
                     try {
@@ -2227,7 +2182,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 _getAllAttachments: async function (sender, e) {
                     //preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown"); // need table
-                    let itemsTable = $("#itemsTable tbody");
+                    //let itemsTable = $("#itemsTable tbody");
 
                     try {
                         console.log(" getting all attachments ");
@@ -2756,6 +2711,16 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     const customAttribute = await (await fetch(customAttributeUrl)).text();
                     console.log("custom att is ", customAttribute);
+                    if (customAttribute === null) {
+                        customAttribute = "";
+                    }
+                    console.log("we are getting here 2717");
+                    if (name === null || name === "") {
+                        folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute; //we will use .trim after to condense it
+                    } else {
+                        folderName = name;
+                    }
+                    console.log("name is ", folderName)
 
                     try {
                         //console.log("req id is", reqId, "identifier is ", this._rowIndex);
@@ -2763,15 +2728,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         console.log("creating folder with current path ", Sharepoint._currentPath);
-                        if (name === null) {
-                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
-                        } else {
-                            folderName = name;
-                        }
+                        
                         //let name2 = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
 
 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + folderName + "&ReqId "+ reqId;
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + folderName.trim() + "&ReqId "+ reqId;
                         console.log("we are going to this create url ", url);
                         //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
@@ -2899,6 +2860,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 let confirm = document.createElement("button");
                                 confirm.textContent = "✔";
                                 confirm.onclick = (event) => {
+                                    event.preventDefault();
                                     let name = input.value.trim();
                                     if (name) {
                                         const newId = `folder_${Date.now()}`;
@@ -2931,11 +2893,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                         // Remove the input div
                                         newDiv.remove();
-                                        Sharepoint._createFolder(name);//should render as well, putting from input
+                                        //if (name === null) {
+                                        //    name = "";
+                                        //}
+                                        //console.log("we are about to call create folde fun")
+                                        //Sharepoint._createFolder(name);//should render as well, putting from input
 
 
-                                        
+
+                                    }//whenever tick is clicked then we do this
+                                    if (name === null) {
+                                        name = "";
                                     }
+                                    console.log("we are about to call create folde fun")
+                                    Sharepoint._createFolder(name);//should render as well, putting from input
                                 };
 
                                 let cancel = document.createElement("button");
@@ -2943,6 +2914,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 cancel.onclick = () => {
                                     newDiv.remove();
                                 };
+
+                                let folderElement = icons.folderClosed;
+                                let folderSpan = document.createElement('span');
+                                folderSpan.innerHTML = folderElement;
+
+                                newDiv.appendChild(folderSpan);
 
                                 newDiv.appendChild(input);
                                 newDiv.appendChild(confirm);
@@ -3015,7 +2992,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         Sharepoint._currentPath = folderPaths[item.id];
 
                         // Update the selected folder display
-                        $("#selectedFolder").text(Sharepoint._currentPath);
+                        let text = "Current Selected Path is: " + Sharepoint._currentPath;
+                        $("#selectedFolder").text(text);
 
                         // Optionally, update the selected style for the folder name
                         $('.folder-name').removeClass('selected');
@@ -3048,7 +3026,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     Sharepoint._currentSelectedFolderId = folderId;
                     Sharepoint._currentPath = folderPaths[folderId];
 
-                    $("#selectedFolder").text(Sharepoint._currentPath);
+                    let text = "Current Selected Path is: " + Sharepoint._currentPath;
+                    $("#selectedFolder").text(text);
 
                     const selectedItem = $(`[data-item-id="${folderId}"] .folder-name`);
                     if (selectedItem.length) {
