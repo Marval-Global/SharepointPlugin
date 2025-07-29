@@ -836,11 +836,6 @@
     <div id="successMessage">Success Message</div>
 
 
-
-
-
-
-
     <div id="selectedFolder">Current Folder Path</div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
 
@@ -1041,6 +1036,7 @@
                 _currentSelectedFolderId: null,
                 _requestAcronym: null,
                 _requestNumber: null,
+                _customAttribute:null,
 
                 // Sharepoint: null,
 
@@ -1708,7 +1704,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     // Create the input field
                     const input = document.createElement('input');
                     input.type = 'text';
-                    input.placeholder = 'New folder name';
+                    input.text = "Hi"
+                    input.placeholder = 'New ddd name';
                     input.style.cssText = `
         flex: 1;
         border: none;
@@ -2163,7 +2160,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             //summaryDiv.style.marginLeft = "26px"; // align under label text
                             //summaryDiv.style.color = "#555";
                             //summaryDiv.style.fontSize = "0.9em";
-                            //summaryDiv.className = "note-summary"; // <-- add this
+                            summaryDiv.className = "note2-summary"; // <-- add this
 
                             // Append to container
                             container.appendChild(checkbox);
@@ -2276,7 +2273,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log("all ticked email boxes are ", emailBoxes);
                     console.log("all ticked notes boxes are ", notesBoxes);
                     console.log("all ticked checked boxes are ", checkedBoxes);
-                    if (checkedBoxes.length === 0 && notesBoxes.length === 0) {
+                    if (checkedBoxes.length === 0 && notesBoxes.length === 0 && emailBoxes.length ===0) {
                         console.warn("No attachments selected.");
                         alert("Please select at least one attachment to upload.");
                         return;
@@ -2326,6 +2323,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 console.log(`Uploaded email: ${subject}`, response);
                                 $("#successMessage")
                                     .text("Successfully uploaded emails")
+                                    .css("color","green")
                                     .fadeIn("slow")
                                     .delay(2000)
                                     .fadeOut("slow");
@@ -2334,6 +2332,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 console.error("Upload error for", subject, ex);
                                 $("#successMessage")
                                     .text("Error could not upload notes")
+                                    .css("color", "red")
                                     .fadeIn("slow")
                                     .delay(2000)
                                     .fadeOut("slow");
@@ -2399,20 +2398,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                 let response = await result.json();
                                 console.log("Combined upload successful", response);
-                                $("#successMessage").text("Uploaded combined notes").fadeIn("slow").delay(2000).fadeOut("slow");
+                                $("#successMessage").text("Uploaded combined notes").fadeIn("slow").delay(2000).fadeOut("slow").css("color", "green");
 
                             } catch (ex) {
                                 console.error("Upload failed", ex);
-                                $("#successMessage").text("Failed to upload combined notes").fadeIn("slow").delay(2000).fadeOut("slow");
+                                $("#successMessage").text("Failed to upload combined notes").fadeIn("slow").delay(2000).fadeOut("slow").css("color", "red");
                             }
 
                             return; // skip individual uploads
                         } else {
                             console.log("tickbox was not checked so we are uploading notes individually");
                             for (let notebox of notesBoxes) {
-                                let attachmentName = $(notebox).val(); // file name stored in value
+                                let attachmentName = notebox.value; // file name stored in value
                                 let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
-                                let summaryText = $(notebox).closest(".note2-item").find(".note2-summary").text().trim();
+                                let summaryText= notebox.closest(".note2-item").querySelector(".note2-summary").textContent.trim();
 
 
                                 console.log("Uploading attachment:", summaryText);
@@ -2449,7 +2448,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                         .text("Successfully uploaded notes")
                                         .fadeIn("slow")      // Fade in
                                         .delay(2000)         // Wait 2 seconds
-                                        .fadeOut("slow");    // Then fade out
+                                        .fadeOut("slow")    // Then fade out
+                                        .css("color", "green");
 
                                 } catch (ex) {
                                     console.error("Upload error for", attachmentName, ex);
@@ -2457,14 +2457,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                         .text("Error could not upload notes")
                                         .fadeIn("slow")      // Fade in
                                         .delay(2000)         // Wait 2 seconds
-                                        .fadeOut("slow");
+                                        .fadeOut("slow")
+                                        .css("color", "red");
                                 }
                             }
                         }
 
 
                         for (let checkbox of checkedBoxes) {
-                            let attachmentName = $(checkbox).val(); // file name stored in value
+                            let attachmentName = checkbox.value; // file name stored in value
                             let identifier = checkbox.dataset.attachmentId; //checkboxes store the attachment data
 
                             console.log("Uploading attachment:", attachmentName);
@@ -2535,6 +2536,23 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
 
                     alert("Upload complete.");
+
+                    $("#attachmentsDiv input[type='checkbox']").prop("checked", false);
+                    $("#notesDiv input[type='checkbox']").prop("checked", false);
+                    $("#emailsDiv input[type='checkbox']").prop("checked", false);
+
+                    //let checkedBoxes = $("#attachmentsDiv input[type='checkbox']:checked");
+                    checkedBoxes.forEach((checkbox => {
+                        checkbox.prop("checked", false);
+                    }))
+                    notesBoxes.forEach((checkbox => {
+                        checkbox.prop("checked", false);
+                    }))
+                    emailBoxes.forEach((checkbox => {
+                        checkbox.prop("checked", false);
+                    }))
+                    //let notesBoxes = $("#notesDiv input[type='checkbox']:checked");
+                    //let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
                 },
 
 
@@ -2837,6 +2855,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemElement.style.paddingLeft = `${level * 20 + 8}px`;
                     itemElement.dataset.itemId = item.id;
 
+                    //let customAttribute = await Sharepoint._getAllCustomAttributeValue();
+
+                    //console.log("custom att is ", customAttribute);
+                    //if (customAttribute === null) {
+                    //    customAttribute = "";
+                    //}
+
                     // Controls container
                     const controlsDiv = document.createElement('div');
                     controlsDiv.className = 'tree-controls';
@@ -2866,7 +2891,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                 let input = document.createElement("input");
                                 input.classList.add("new-folder-input");
-                                input.placeholder = "New folder name";
+                                input.placeholder = "New Hi Name";
+                                input.value = folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + Sharepoint._customAttribute;
 
                                 let confirm = document.createElement("button");
                                 confirm.textContent = "✔";
@@ -2978,15 +3004,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     nameSpan.className = 'folder-name';
                     nameSpan.textContent = item.name;
 
-                    const countHtml = item.folder && item.folder.childCount > 0 ?
-                        `<span class="item-count">${item.folder.childCount} items</span>` : '';
+                    //const countHtml = item.folder && item.folder.childCount > 0 ?
+                    //    `<span class="item-count">${item.folder.childCount} items</span>` : '';
 
-                    const dateHtml = `<span class="last-modified">${Sharepoint._formatDate(item.lastModifiedDateTime)}</span>`;
+                    //const dateHtml = `<span class="last-modified">${Sharepoint._formatDate(item.lastModifiedDateTime)}</span>`;
 
                     itemElement.appendChild(controlsDiv);
                     itemElement.appendChild(nameSpan);
-                    if (countHtml) itemElement.insertAdjacentHTML('beforeend', countHtml);
-                    itemElement.insertAdjacentHTML('beforeend', dateHtml);
+                    //if (countHtml) itemElement.insertAdjacentHTML('beforeend', countHtml);
+                    //itemElement.insertAdjacentHTML('beforeend', dateHtml);
 
                     // Hover effects
                     itemElement.addEventListener('mouseenter', () => itemElement.classList.add('hovered'));
@@ -3167,6 +3193,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 _renderTree: async function () {
                     const container = window.top.document.getElementById('treeContent');
                     container.innerHTML = '';
+
+                    Sharepoint._customAttribute = await Sharepoint._getAllCustomAttributeValue(); //setting it here
 
                     // Get the selected siteId from the dropdown
                     let siteId = window.top.document.getElementById('sitesDropdown').value;
