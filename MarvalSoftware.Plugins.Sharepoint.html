@@ -2747,11 +2747,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.error("we have error", ex);
                     }
                 },
-                _createFolder: async function (sender, e) {
-                    e.preventDefault(); //prevent default everytime
+                _createFolder: async function (name = null) {
+                   /// e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
                     //let foldersDropdown = $("#foldersDropdown");
                     const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
+                    let folderName;
 
                     const customAttribute = await (await fetch(customAttributeUrl)).text();
                     console.log("custom att is ", customAttribute);
@@ -2762,10 +2763,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         console.log("creating folder with current path ", Sharepoint._currentPath);
-                        let name = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
+                        if (name === null) {
+                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
+                        } else {
+                            folderName = name;
+                        }
+                        //let name2 = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
 
 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + name + "&ReqId "+ reqId;
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + folderName + "&ReqId "+ reqId;
                         console.log("we are going to this create url ", url);
                         //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
@@ -2842,23 +2848,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     };
                 },
 
-        // SVG icons
-//        const icons = {
-//            chevronRight: `<svg class="chevron" viewBox="0 0 16 16">
-//    <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
-//</svg>`,
-//            folderClosed: `<svg class="folder-icon" viewBox="0 0 20 20">
-//    <path d="M2 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z"/>
-//</svg>`,
-//            folderOpen: `<svg class="folder-icon" viewBox="0 0 20 20">
-//    <path d="M2 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z" fill-opacity="0.7"/>
-//    <path d="M2 8h16v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8Z"/>
-//</svg>`,
-//            spinner: `<div class="spinner"></div>`
-//        };
-
-                // Create tree item element
-
+    
         //function createTreeItem(item, level = 0) 
                 _createTreeItem: function (item, level) {
                     //console.log("we are at create tree item");
@@ -2908,7 +2898,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                 let confirm = document.createElement("button");
                                 confirm.textContent = "✔";
-                                confirm.onclick = () => {
+                                confirm.onclick = (event) => {
                                     let name = input.value.trim();
                                     if (name) {
                                         const newId = `folder_${Date.now()}`;
@@ -2921,28 +2911,30 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                         // Register it in the folder data structure
                                         if (!folderData[newId]) {
-                                            folderData[newId] = newFolder;
+                                            folderData[newId] = newFolder; //ading to my hashmap with new details
                                         }
 
                                         // Add to parent's children array
-                                        if (!folderData[parentId]) {
+                                        if (!folderData[parentId]) { //
                                             folderData[parentId] = { children: [] };
                                         }
                                         if (!folderData[parentId].children) {
                                             folderData[parentId].children = [];
                                         }
                                         folderData[parentId].children.push(newFolder); // Push the folder object, not just ID
+                                        //add the create folder so _create folder for mine
+                                        //make sure to update the path correctly as well, then we can re render the tree, do re togle folder thing after creation and ok]
+                                        //if they leave it empty, the background should be the incident name + type + req id?
+                                        //maybe need to delete those things in folder data
+
+                                        //actually when we render childern, we cannot find this fake id when we fetch children so it wont get rednered anyways
 
                                         // Remove the input div
                                         newDiv.remove();
+                                        Sharepoint._createFolder(name);//should render as well, putting from input
 
-                                        // Re-render the tree or just the parent's children
-                                        if (typeof self._renderTree === 'function') {
-                                            self._renderTree();
-                                        } else {
-                                            // Alternative: re-render just this section
-                                            renderChildren(parentId);
-                                        }
+
+                                        
                                     }
                                 };
 
