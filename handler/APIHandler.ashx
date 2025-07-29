@@ -434,38 +434,38 @@ public class Handler : PluginHandler
                     }
                 }else if(getParamVal == "getCustomAttributeValues")
                 {
-                        try
-                        {
-                            string requestBody;
-                            var identifer = context.Request.QueryString["identifier"];
-                            var reqId = context.Request.QueryString["reqId"];
+                    try
+                    {
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
 
-                            string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId;
-                            Log.Information("url here is" + attachmentUrl);
-                            httpWebRequest = BuildRequest(attachmentUrl);
-                            httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
-                            httpWebRequest.Method = "GET";
-                            // Get the attachment data as byte array
-                            byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
-                           ;
+                        string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId;
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        ;
 
-                            if (attachmentData != null && attachmentData.Length > 0)
-                            {
-                                context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
-                                context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
-                            }
-                            else
-                            {
-                                Log.Warning("No attachment data received from MSM API");
-                                context.Response.Write("No attachment data found");
-                            }
-                        }
-                        catch (Exception e)
+                        if (attachmentData != null && attachmentData.Length > 0)
                         {
-                            Log.Error("Exception during attachment upload: " + e.Message, e);
-                            context.Response.Write("Error uploading file: " + e.Message);
+                            context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
+                            context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
                         }
-                                        }
+                        else
+                        {
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
+                }
                 else if (getParamVal == "getAllAttachments")
                 {
                     try
@@ -880,13 +880,15 @@ public class Handler : PluginHandler
                     Log.Information("data is" + data);
                     string siteId = data.siteId;
                     string folderPath = data.folderPath;
+                    Log.Information("Site id from my frontend is " + siteId);
+
                     if (!String.IsNullOrEmpty(folderPath))//if exists
                     {
-                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/" + folderPath + ":/children";
+                        url = "https://graph.microsoft.com/v1.0/sites/"+siteId+"/drive/root:/" + folderPath + ":/children";
                     }
                     else
                     {
-                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children"; //meaning get root folders
+                        url = "https://graph.microsoft.com/v1.0/sites/"+siteId+"/drive/items/root/children"; //meaning get root folders
                     }
 
                     Log.Information("apptoken is: " + apptoken);
