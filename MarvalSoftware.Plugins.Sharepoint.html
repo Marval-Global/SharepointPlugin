@@ -2706,10 +2706,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                    /// e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
                     //let foldersDropdown = $("#foldersDropdown");
-                    const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
                     let folderName;
+                    const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
 
-                    const customAttribute = await (await fetch(customAttributeUrl)).text();
+
+                    //const customAttribute = await (await fetch(customAttributeUrl)).text();
+                    let customAttribute = await Sharepoint._getAllCustomAttributeValue();
+                    
                     console.log("custom att is ", customAttribute);
                     if (customAttribute === null) {
                         customAttribute = "";
@@ -3657,13 +3660,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     } else {
                         console.log("folder path is still null")
                     }
-                    
 
-                    //console.log("apptoken is:", apptoken);
                     try {
-                        //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
-                        //  console.log("apptoken is:", apptoken);
                         const response = await fetch(_fullPluginPathHandler + "?endpoint=getAllFolders", {
                             method: "POST",
                             "headers": [["content-type", "application/json"]],
@@ -3679,18 +3678,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         console.log("All folders are: ", foldersJson);
 
-                        //console.log("we should be appending folders now");
-                        //let $dropdown = $('#foldersDropdown');
-                        //if ($dropdown) {
-                        //    console.log("folders dropdown does exist");
-                        //}
-                        //$dropdown.empty();
-                        //$dropdown.append('<option value = "">-- Select a Folder --</option>');
-
-                        //foldersJson.value.forEach(site => {
-                        //  //  console.log("folder here is", site);
-                        //    $dropdown.append($('<option>').val(site.id).text(site.name));
-                        //});
                         console.log("appending should finish!");
 
                         //in theory should have all our sites if response is correct
@@ -3699,6 +3686,42 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     } catch (error) {
                         console.log("Error fetching sites: ", error);
+                    }
+                },
+                _getAllCustomAttributeValue: async function () {
+                    let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                    let url = _fullPluginPathHandler + "?endpoint=getCustomAttributeValues&reqId=" + reqId;
+                    try {
+
+                        const response = await fetch(url, {
+                            method: "GET",
+                            "headers": [["content-type", "application/json"]],
+
+
+                        });
+                        let CAJson = await response.json(); //response promise
+                        console.log("ca json is ", CAJson);
+                        const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
+
+                        const customAttribute = await (await fetch(customAttributeUrl)).text(); //now we need to match this
+                        console.log("custom attribute json is ", customAttribute);
+
+                        let returnVal = "";
+                        CAJson.entity.data.attributes.forEach((attribute) => {
+                            if (attribute.attributeType.name === customAttribute) {
+                                returnVal = attribute.value//now we can use it to set folder name
+                            }
+                        })
+
+                        console.log("All CA json are: ", CAJson);
+                        return returnVal;
+
+                        //in theory should have all our sites if response is correct
+                        //return foldersJson;//so we can use it later
+
+
+                    } catch (error) {
+                        console.log("Error fetching custom attribute values: ", error);
                     }
                 },
                 _printSiteId: function (e) {
