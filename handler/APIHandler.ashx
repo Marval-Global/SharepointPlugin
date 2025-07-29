@@ -345,7 +345,7 @@ public class Handler : PluginHandler
                 else if (getParamVal == "CustomAttribute")
                 {
                     context.Response.Write(CustomAttribute);
-                    
+
                 }
                 else if (getParamVal == "generatePassword")
                 {
@@ -432,7 +432,40 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
-                }
+                }else if(getParamVal == "getCustomAttributeValues")
+                {
+                        try
+                        {
+                            string requestBody;
+                            var identifer = context.Request.QueryString["identifier"];
+                            var reqId = context.Request.QueryString["reqId"];
+
+                            string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId;
+                            Log.Information("url here is" + attachmentUrl);
+                            httpWebRequest = BuildRequest(attachmentUrl);
+                            httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                            httpWebRequest.Method = "GET";
+                            // Get the attachment data as byte array
+                            byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                           ;
+
+                            if (attachmentData != null && attachmentData.Length > 0)
+                            {
+                                context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
+                                context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
+                            }
+                            else
+                            {
+                                Log.Warning("No attachment data received from MSM API");
+                                context.Response.Write("No attachment data found");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error("Exception during attachment upload: " + e.Message, e);
+                            context.Response.Write("Error uploading file: " + e.Message);
+                        }
+                                        }
                 else if (getParamVal == "getAllAttachments")
                 {
                     try
@@ -441,7 +474,7 @@ public class Handler : PluginHandler
                         var identifer = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
 
-                        string attachmentUrl = MSMBaseUrl+"/api/serviceDesk/operational/requests/" + reqId + "/attachments";
+                        string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId + "/attachments";
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -466,7 +499,7 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
-                }else if (getParamVal == "getAllEmails")
+                } else if (getParamVal == "getAllEmails")
                 {
                     try
                     {//not even using this
