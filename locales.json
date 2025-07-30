@@ -6,7 +6,10 @@
       "PluginDisplayname": "Sharepoint",
       "UserAPIKey": "User API Key",
       "ClientID": "Microsoft Application Client ID",
-      "CustomAttribute":"Custom Attribute"
+      "CustomAttribute": "Custom Attribute",
+      "@@AutomateSubfolderCreation" : "Automate Subfolder Creation",
+      "@@SuggestDirectoryName" :"Suggest Directory Name",
+      "@@createFolderOption" : "Create Folder Option"
     }
   }]
 }
