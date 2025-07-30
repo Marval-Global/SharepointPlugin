@@ -15,7 +15,10 @@
   "GlobalSettings": [
     "@@MarvalAPIKey",
     "@@ClientID",
-    "@@CustomAttribute"
+    "@@CustomAttribute",
+    "@@AutomateSubfolderCreation",
+    "@@SuggestDirectoryName",
+    "@@createFolderOption"
   ],
   "HtmlImportFile": "MarvalSoftware.Plugins.Sharepoint.html",
   "TagName": "marvalsoftware-plugins-sharepoint"
