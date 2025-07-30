@@ -30,7 +30,6 @@
             animation: fadeInUp 0.8s ease-out;*/
 
         .mini-create-btn {
-
             background-color: white !important;
         }
 
@@ -43,7 +42,7 @@
             height: 50px;
             margin: auto;
             border: 3px solid #32C0F0;
-            border-radius:10px;
+            border-radius: 10px;
             padding: 15px;
             display: block;
             font-family: 'Inter', sans-serif;
@@ -305,8 +304,28 @@
             font-style: italic;
         }
 
+        #combineNotesBox {
+            height: 20px;
+            background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
+            background-size: 300% 300%;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(50, 192, 240, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin: 15px;
+            animation: gradientShift 3s ease infinite;
+        }
         /* Upload Button */
-        #combineNotesBox, #uploadButtonTwo {
+        #uploadButtonTwo {
             height: 40px;
             background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
             background-size: 300% 300%;
@@ -884,6 +903,7 @@
 
     <div id="selectedFolder">Current Folder Path</div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
+    <input type="checkbox" id="createSubfolder"/>
 
 
 </template>
@@ -1082,7 +1102,7 @@
                 _currentSelectedFolderId: null,
                 _requestAcronym: null,
                 _requestNumber: null,
-                _customAttribute:null,
+                _customAttribute: null,
 
                 // Sharepoint: null,
 
@@ -2319,7 +2339,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log("all ticked email boxes are ", emailBoxes);
                     console.log("all ticked notes boxes are ", notesBoxes);
                     console.log("all ticked checked boxes are ", checkedBoxes);
-                    if (checkedBoxes.length === 0 && notesBoxes.length === 0 && emailBoxes.length ===0) {
+                    if (checkedBoxes.length === 0 && notesBoxes.length === 0 && emailBoxes.length === 0) {
                         console.warn("No attachments selected.");
                         alert("Please select at least one attachment to upload.");
                         return;
@@ -2335,18 +2355,21 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             let subject = $(emailbox).data("subject");
                             let address = $(emailbox).data("address");
                             let messageDate = $(emailbox).data("date");
+                            let isChecked = $("#createSubfolder").prop("checked") ? "true" : "false";
+
                             let identifier = emailbox.dataset.attachmentId;
 
                             console.log("Uploading email here:", subject, "with microsoft token ", Sharepoint._microsoftToken);
 
-                            let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadEmail&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + encodeURIComponent(subject);
+                            let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadEmail&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + subject + ".txt";
 
                             let payload = {
                                 microsoftToken: Sharepoint._microsoftToken,
                                 siteId: siteId,
                                 folderId: folderPath,
                                 address: address,
-                                messageDate: messageDate
+                                messageDate: messageDate,
+                                createSubfolder: isChecked
                             };
 
                             console.log("payload", payload);
@@ -2369,7 +2392,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 console.log(`Uploaded email: ${subject}`, response);
                                 $("#successMessage")
                                     .text("Successfully uploaded emails")
-                                    .css("color","green")
+                                    .css("color", "green")
                                     .fadeIn("slow")
                                     .delay(2000)
                                     .fadeOut("slow");
@@ -2457,7 +2480,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             for (let notebox of notesBoxes) {
                                 let attachmentName = notebox.value; // file name stored in value
                                 let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
-                                let summaryText= notebox.closest(".note2-item").querySelector(".note2-summary").textContent.trim();
+                                let summaryText = notebox.closest(".note2-item").querySelector(".note2-summary").textContent.trim();
 
 
                                 console.log("Uploading attachment:", summaryText);
@@ -2592,7 +2615,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             .fadeOut("slow");
                     }
 
-                   
+
                 },
 
 
