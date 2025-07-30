@@ -34,6 +34,25 @@
             padding: 10px;
             display: block;
         }
+        #successMessage {
+            display: block;
+            width: 45%;
+            margin: auto;
+            margin-top:5px;
+            border: 3px solid #E25F94;
+            padding: 10px;
+            height: 40px;
+        }
+
+        #selectedFolder {
+            display: block;
+            width: 45%;
+            margin: auto;
+            margin-top: 5px;
+            border: 3px solid #7867AD;
+            padding: 10px;
+            height: 40px;
+        }
 
         #content {
             background: #f5f5f5;
@@ -481,6 +500,13 @@
             fill: #6b7280 !important;
             transition: transform 0.2s !important;
         }
+
+/*        .mini-create-btn {
+            width: 16px !important;
+            height: 16px !important;
+            fill: #6b7280 !important;
+            transition: transform 0.2s !important;
+        }*/
 
         .plus-icon {
             width: 12px !important;
@@ -2405,7 +2431,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 $("#successMessage").text("Failed to upload combined notes").fadeIn("slow").delay(2000).fadeOut("slow").css("color", "red");
                             }
 
-                            return; // skip individual uploads
+                            //return; // skip individual uploads
                         } else {
                             console.log("tickbox was not checked so we are uploading notes individually");
                             for (let notebox of notesBoxes) {
@@ -2510,6 +2536,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     .fadeOut("slow");
                             }
                         }
+                        console.log("we are cleariing checkboxes")
                         checkedBoxes.each(function () {
                             $(this).prop("checked", false);
                         });
@@ -3251,19 +3278,74 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemsDiv.className = "body";
                     itemsDiv.style.display = "block";
 
-                    // Helper to create a section
                     function createSection(headerText, contentId) {
                         let section = document.createElement("div");
                         section.className = "section";
 
                         let sectionHeader = document.createElement("div");
                         sectionHeader.className = "section-header";
-                        sectionHeader.innerText = headerText;
+                        sectionHeader.style.display = "flex";
+                        sectionHeader.style.alignItems = "center";
+                        sectionHeader.style.justifyContent = "space-between";
+                        sectionHeader.style.cursor = "pointer";
+
+                        let headerTitle = document.createElement("span");
+                        headerTitle.innerText = headerText;
+
+                        let toggleButton = document.createElement("button");
+                        toggleButton.className = "toggle-btn";
+                        toggleButton.innerHTML = "▼"; // Down arrow when expanded
+                        toggleButton.style.background = "none";
+                        toggleButton.style.border = "none"; //we shouold probably style using a id then in the style section
+                        toggleButton.style.fontSize = "12px";
+                        toggleButton.style.cursor = "pointer";
+                        toggleButton.style.padding = "2px 6px";
+                        toggleButton.style.borderRadius = "3px";
+                        toggleButton.style.transition = "transform 0.2s ease";
 
                         let sectionContent = document.createElement("div");
                         sectionContent.className = "section-content";
                         sectionContent.id = contentId;
+                        sectionContent.style.transition = "all 0.3s ease";
+                        sectionContent.style.overflow = "hidden";
 
+                        // Toggle functionality
+                        function toggleSection() {
+                            const isCollapsed = sectionContent.style.display === "none";
+
+                            if (isCollapsed) {
+                                // Expand
+                                sectionContent.style.display = "block"; //just hide and show
+                                toggleButton.innerHTML = "▼";
+                                toggleButton.style.transform = "rotate(0deg)";
+                                sectionHeader.title = "Click to collapse";
+                            } else {
+                                // Collapse
+                                sectionContent.style.display = "none"; //hide
+                                toggleButton.innerHTML = "▶";
+                                toggleButton.style.transform = "rotate(-90deg)";
+                                sectionHeader.title = "Click to expand";
+                            }
+                        }
+
+                        // Add click handlers
+                        sectionHeader.addEventListener("click", toggleSection);
+                        toggleButton.addEventListener("click", (e) => {
+                            e.stopPropagation(); // Prevent double triggering
+                            e.preventDefault();
+                            toggleSection();
+                        });
+
+                        // Hover effects
+                        sectionHeader.addEventListener("mouseenter", () => {
+                            sectionHeader.style.backgroundColor = "#f0f0f0";
+                        });
+                        sectionHeader.addEventListener("mouseleave", () => {
+                            sectionHeader.style.backgroundColor = "";
+                        });
+
+                        sectionHeader.appendChild(headerTitle);
+                        sectionHeader.appendChild(toggleButton);
                         section.appendChild(sectionHeader);
                         section.appendChild(sectionContent);
 
