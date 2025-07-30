@@ -3,7 +3,7 @@
   "Organisation": "MarvalSoftware",
   "DisplayName": "@@PluginDisplayname",
   "Icon": "img/Pushover_16.png",
-  "Version": "1.0.5",
+  "Version": "1.0.6",
   "SupportedVersions": [
     "15.11.0",
     "0.0.0"
