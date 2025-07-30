@@ -2336,6 +2336,18 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let checkedBoxes = $("#attachmentsDiv input[type='checkbox']:checked");
                     let notesBoxes = $("#notesDiv input[type='checkbox']:checked");
                     let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
+
+                    let isChecked = $("#createSubfolder").prop("checked");
+                    if (isChecked) {
+                        let response = await Sharepoint._createFolder("subfolder inside of a folder");//creating where we last clicked!
+                        Sharepoint._currentPath += "/" + response.name;
+
+                        //then we simply update the path and do the call
+                    }
+                    //we should do create folder here first, then we can use the path and upload to that path!
+
+
+
                     console.log("all ticked email boxes are ", emailBoxes);
                     console.log("all ticked notes boxes are ", notesBoxes);
                     console.log("all ticked checked boxes are ", checkedBoxes);
@@ -2355,7 +2367,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             let subject = $(emailbox).data("subject");
                             let address = $(emailbox).data("address");
                             let messageDate = $(emailbox).data("date");
-                            let isChecked = $("#createSubfolder").prop("checked") ? "true" : "false";
+                            
 
                             let identifier = emailbox.dataset.attachmentId;
 
@@ -2449,6 +2461,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 siteId: siteId,
                                 folderId: folderPath,
                                 combinedText: combinedContent,
+                                createSubfolder: isChecked,
                                 attachmentName: Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute + " Combined Notes.txt"//we will use .trim after to condense it //should probably make this changable for the user
                             };
 
@@ -2494,7 +2507,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 let payload = {
                                     microsoftToken: Sharepoint._microsoftToken,
                                     siteId: siteId,
-                                    folderId: folderPath
+                                    folderId: folderPath,
+                                    createSubfolder: isChecked
                                 };
 
                                 try {
@@ -2545,7 +2559,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             let payload = {
                                 microsoftToken: Sharepoint._microsoftToken,
                                 siteId: siteId,
-                                folderId: folderPath
+                                folderId: folderPath,
+                                createSubfolder: isChecked
                             };
 
                             try {
@@ -2832,7 +2847,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let payLoad = {
                             microsoftToken: Sharepoint._microsoftToken,
                             siteId: sitesDropdown.val(),
-                            folderId: Sharepoint._currentPath
+                            folderId: Sharepoint._currentPath//create here
 
                         }
                         console.log("url is", url);
@@ -2863,6 +2878,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("attachment feedback", attachment);
                         // Construct fake folder item (you may need to adjust these fields)
                         await Sharepoint._toggleFolder(Sharepoint._currentSelectedFolderId, {}, { preventDefault: () => { } }, true);
+                        return attachment;
 
 
                     } catch (ex) {
