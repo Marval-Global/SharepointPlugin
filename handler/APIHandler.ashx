@@ -58,6 +58,7 @@ public class Handler : PluginHandler
 
     private string APIKey { get; set; }
 
+
     private string Password { get; set; }
     private string Username { get; set; }
     private string Host { get; set; }
@@ -69,6 +70,10 @@ public class Handler : PluginHandler
     private string ClientID { get { return this.GlobalSettings["@@ClientID"]; } }
     private string MarvalAPIKey { get { return this.GlobalSettings["@@MarvalAPIKey"]; } }
     private string CustomAttribute { get { return this.GlobalSettings["@@CustomAttribute"]; } }
+    private string AutomateSubfolderCreation { get { return this.GlobalSettings["@@AutomateSubfolderCreation"]; } }
+    private string SuggestDirectoryName { get { return this.GlobalSettings["@@SuggestDirectoryName"]; } }
+    private string createFolderOption { get { return this.GlobalSettings["@@createFolderOption"]; } }
+
     private string MSMBaseUrl
     {
         get
@@ -346,6 +351,9 @@ public class Handler : PluginHandler
                 {
                     context.Response.Write(CustomAttribute);
 
+                }else if (getParamVal == "AutomateSubfolderCreation")
+                {
+                    context.Response.Write(AutomateSubfolderCreation);
                 }
                 else if (getParamVal == "generatePassword")
                 {
@@ -399,7 +407,7 @@ public class Handler : PluginHandler
                 else if (getParamVal == "SecretKey")
                 {
                     context.Response.Write("Hi");
-                }else if (getParamVal == "getAllNotes")
+                } else if (getParamVal == "getAllNotes")
                 {
                     try
                     {
@@ -407,7 +415,7 @@ public class Handler : PluginHandler
                         var identifer = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
 
-                        string attachmentUrl = MSMBaseUrl+"/api/serviceDesk/operational/requests/" + reqId + "/notes";
+                        string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId + "/notes";
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -432,7 +440,7 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
-                }else if(getParamVal == "getCustomAttributeValues")
+                } else if (getParamVal == "getCustomAttributeValues")
                 {
                     try
                     {
