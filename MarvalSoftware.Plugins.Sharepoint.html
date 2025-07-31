@@ -2338,11 +2338,17 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
 
                     let isChecked = $("#createSubfolder").prop("checked");
-                    if (isChecked) {
-                        let response = await Sharepoint._createFolder("subfolder inside of a folder");//creating where we last clicked!
+                    let url = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
+
+                    let AutomateSubfolderCreation = await (await fetch(url)).text();
+                    console.log("AutomateSubfolderCreation is ", AutomateSubfolderCreation);
+                    if (AutomateSubfolderCreation === "yes") {
+                        let response = await Sharepoint._createFolder("subfolder inside of a folder and yes");//creating where we last clicked!
                         Sharepoint._currentPath += "/" + response.name;
 
                         //then we simply update the path and do the call
+                    } else {
+                        console.log("we do not need to automate subfolder creatioj");
                     }
                     //we should do create folder here first, then we can use the path and upload to that path!
 
@@ -2535,7 +2541,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                         .css("color", "green");
 
                                 } catch (ex) {
-                                    console.error("Upload error for", attachmentName, ex);
+                                    console.error("Upload error for", ex);
                                     $("#successMessage")
                                         .text("Error could not upload notes")
                                         .fadeIn("slow")      // Fade in
@@ -2605,24 +2611,24 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             $(this).prop("checked", false);
                         });
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createUploadNote&reqId=" + reqId;
-                        let res = fetch(url, {
+                        let res = await fetch(url, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json; charset=utf-8"
                             },
-                            body: {}
+                            body: JSON.stringify({})
                         });
-                        if (!result.ok) {
+                        if (!res.ok) {
                             let errorText = await res.text();
                             throw new Error(`Error uploading}": ${res.status} - ${errorText}`);
                         }
-                        let response = await result.json();
+                        //let response = await res.json();
                         console.log("Uploaded: successfully");
 
 
 
                     } catch (ex) {
-                        console.error("Upload error for", attachmentName, ex);
+                        console.error("Upload error for", ex);
                         $("#successMessage")
                             .text("Error could not upload attachments")
                             .fadeIn("slow")      // Fade in
