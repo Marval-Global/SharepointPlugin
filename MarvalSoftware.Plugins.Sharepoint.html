@@ -1103,6 +1103,9 @@
                 _requestAcronym: null,
                 _requestNumber: null,
                 _customAttribute: null,
+                _SuggestDirectoryName: null,
+                _createFolderOption: null,
+                _AutomateSubfolderCreation:null,
 
                 // Sharepoint: null,
 
@@ -2969,6 +2972,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             let parentItem = e.currentTarget.parentElement.parentElement; // Get the tree-item div
                             let parentId = parentItem?.dataset.itemId;
 
+                            //Sharepoint._SuggestDirectoryName = await(await fetch(_fullPluginPathHandler + "?endpoint=SuggestDirectoryName")).text();
+
                             // Only append if input doesn't already exist
                             if (!parentItem.querySelector(".new-folder-input")) {
                                 let newDiv = document.createElement("div");
@@ -2977,8 +2982,17 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                 let input = document.createElement("input");
                                 input.classList.add("new-folder-input");
-                                input.placeholder = "New Hi Name";
-                                input.value = folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + Sharepoint._customAttribute;
+                                input.placeholder = "New Folder Name";
+
+                                let suggestName = "";
+                                if (Sharepoint._SuggestDirectoryName === "yes") {
+                                    console.log("suggest name is yes")
+                                    suggestName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + Sharepoint._customAttribute
+                                } else {
+                                    console.log("suggestr name is no")
+                                    suggestName = "";
+                                }
+                                input.value = suggestName
 
                                 let confirm = document.createElement("button");
                                 confirm.textContent = "✔";
@@ -3333,11 +3347,18 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 // Make toggleFolder available globally
                 //window.toggleFolder = toggleFolder;
 
-                _popup: function (eventTarget) {
+                _popup: async function (eventTarget) {
                     console.log(eventTarget);
                     console.log(document.location.search);
                     let url = (new URLSearchParams(window.top.location.search)).get("id");
                     console.log(url);
+
+                    let url3 = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
+                    Sharepoint._AutomateSubfolderCreation = await(await fetch(_fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation")).text();
+
+                    Sharepoint._SuggestDirectoryName = await(await fetch(_fullPluginPathHandler + "?endpoint=SuggestDirectoryName")).text();
+
+                    Sharepoint._createFolderOption = await(await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text();
 
                     let itemsDiv = document.createElement("div");
                     itemsDiv.id = "itemsDiv";
