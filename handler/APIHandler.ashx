@@ -346,12 +346,18 @@ public class Handler : PluginHandler
                     //     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", appToken);
                     //     context.Response.Write(ex);
                     // }}
+                }else if (getParamVal == "SuggestDirectoryName")
+                {
+                    context.Response.Write(SuggestDirectoryName);
+                }else if (getParamVal == "createFolderOption")
+                {
+                    context.Response.Write(createFolderOption);
                 }
                 else if (getParamVal == "CustomAttribute")
                 {
                     context.Response.Write(CustomAttribute);
 
-                }else if (getParamVal == "AutomateSubfolderCreation")
+                } else if (getParamVal == "AutomateSubfolderCreation")
                 {
                     context.Response.Write(AutomateSubfolderCreation);
                 }
