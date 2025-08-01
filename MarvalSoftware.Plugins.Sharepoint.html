@@ -925,6 +925,7 @@
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
     <!--<input type="checkbox" id="createSubfolder"/>-->
     <button id="saveButton">Save Path</button>
+    <button id="AttachmentsPage">Attachments Page</button>
 
 
 </template>
@@ -2292,6 +2293,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //    e.preventDefault();
                     //    Sharepoint._uploadAllAttachments();
                     //}, this);//probably need to ensure user has selected a path
+
+                    let attachmentsPageButton = $("#AttachmentsPage");
+                    //attachmentsPageButton.click
+
+                    attachmentsPageButton.click(function (e) {
+                        e.preventDefault();
+                        // Your code here
+                        Sharepoint._uploadAllAttachments();
+                    });
 
                     this.siteSelected = this._element.querySelector("#sitesDropdown");
                     eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
@@ -3811,10 +3821,37 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     } else {
                         console.log("saveButton element not found");
                     }
+                    let directoryWindow = $("#ct100_overlay_id4");
+                    let attachmentWindowButton = $("#AttachmentsPage");
+                    if (attachmentWindowButton.length > 0) {
+                        attachmentWindowButton.click(function (e) {
+                            e.preventDefault();
+                            directoryWindow.hide();
+
+                            let overlayWindow = $("#ct100_overlay_id5");
+                            overlayWindow.css({
+                                display: "block",
+                                zIndex: 9999
+                            });
+
+                            // Force focus and bring to front
+                            overlayWindow.focus();
+                            overlayWindow.trigger("focus");
+
+                            // Find first focusable element and focus it
+                            let firstInput = overlayWindow.find('input, button, select, textarea').first();
+                            if (firstInput.length > 0) {
+                                firstInput.focus();
+                            }
+                        });
+                    } else {
+                        console.log("cannot find button");
+                    }
+                    
 
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
-                    let directoryWindow = $("#ct100_overlay_id4");
+                    
                     directoryWindow.hide();
                 },
 
