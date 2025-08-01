@@ -345,6 +345,26 @@
             margin: 15px;
             animation: gradientShift 3s ease infinite;
         }
+        #saveButton {
+            height: 40px;
+            background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
+            background-size: 300% 300%;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(50, 192, 240, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin: 15px;
+            animation: gradientShift 3s ease infinite;
+        }
 
         @keyframes gradientShift {
             0%, 100% {
@@ -903,7 +923,8 @@
 
     <div id="selectedFolder">Current Folder Path</div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
-    <input type="checkbox" id="createSubfolder"/>
+    <!--<input type="checkbox" id="createSubfolder"/>-->
+    <button id="saveButton">Save Path</button>
 
 
 </template>
@@ -2265,6 +2286,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //this.folderBtn = this._element.querySelector("#createFolder");
                     //eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
 
+                    //this.saveButton = this._element.querySelector("#saveButton");
+                    //console.log("we should be calling upload alll now in render elementy");
+                    //eventManager.addHandler(this.saveButton, "click", function (e) {
+                    //    e.preventDefault();
+                    //    Sharepoint._uploadAllAttachments();
+                    //}, this);//probably need to ensure user has selected a path
+
                     this.siteSelected = this._element.querySelector("#sitesDropdown");
                     eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
                     eventManager.addHandler(this.siteSelected, "input", function (e) {
@@ -2489,7 +2517,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let notesBoxes = $("#notesDiv input[type='checkbox']:checked");
                     let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
 
-                    let isChecked = $("#createSubfolder").prop("checked");
+                    //let isChecked = $("#createSubfolder").prop("checked");
                     let url = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
 
                     let AutomateSubfolderCreation = "true"; //by default it is true
@@ -2561,7 +2589,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 folderId: folderPath,
                                 address: address,
                                 messageDate: messageDate,
-                                createSubfolder: isChecked
+                                //createSubfolder: isChecked
                             };
 
                             console.log("payload", payload);
@@ -2702,7 +2730,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     microsoftToken: Sharepoint._microsoftToken,
                                     siteId: siteId,
                                     folderId: folderPath,
-                                    createSubfolder: isChecked
+                                    //createSubfolder: isChecked
                                 };
 
                                 try {
@@ -2754,7 +2782,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 microsoftToken: Sharepoint._microsoftToken,
                                 siteId: siteId,
                                 folderId: folderPath,
-                                createSubfolder: isChecked
+                                //createSubfolder: isChecked
                             };
 
                             try {
@@ -2812,7 +2840,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }
                         //let response = await res.json();
                         console.log("Uploaded: successfully");
-
+                        $("#uploadButtonTwo").hide();
+                        $("#combineNotesCheckbox").prop("checked", false);
 
 
                     } catch (ex) {
@@ -3620,11 +3649,22 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let uploadButtonTwo = document.createElement("button");
                     uploadButtonTwo.id = "uploadButtonTwo";
                     uploadButtonTwo.innerHTML = "🚀 Upload All";
-                    uploadButtonTwo.onclick = function (e) {
+                    uploadButtonTwo.onclick = function (e) {//when we click upload all
                         e.preventDefault();
-                        Sharepoint._uploadAllAttachments(e);
+                        console.log("current path is ", Sharepoint._currentPath)
+                        if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
+                            console.log("current pRTH IS NULL")
+                            let directoryWindow = $("#ct100_overlay_id4");
+                            directoryWindow.show();
+                            $("#ct100_overlay_id5").hide();
+                        } else {
+                            console.log("current paqth is not empty")
+                            //Sharepoint._uploadAllAttachments(e);we can do this on the other window
+                        }
+                        
                     };
 
+                  
                     itemsDiv.appendChild(uploadButtonTwo);
                     uploadButtonTwo.style.display = "none"; //hide it 
 
@@ -3670,7 +3710,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         //    });
                         //});
 
-                        uploadButton.addEventListener('click', function () {
+                        uploadButton.addEventListener('click', function () { 
                             const checkedItems = document.querySelectorAll('input[type="checkbox"]:checked');
                             if (checkedItems.length > 0) {
                                 this.textContent = `✅ Uploading ${checkedItems.length} items...`;
@@ -3760,7 +3800,17 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._getAllNotes();
                     this._getAllAttachments();
 
-
+                    let uploadButton = $('#saveButton');
+                    if (uploadButton.length > 0) {
+                        console.log("save button deos exist ", uploadButton)
+                        uploadButton.click(function (e) {
+                            e.preventDefault();
+                            // Your code here
+                            Sharepoint._uploadAllAttachments();
+                        });
+                    } else {
+                        console.log("saveButton element not found");
+                    }
 
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
