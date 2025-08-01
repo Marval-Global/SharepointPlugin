@@ -1105,7 +1105,7 @@
                 _customAttribute: null,
                 _SuggestDirectoryName: null,
                 _createFolderOption: null,
-                _AutomateSubfolderCreation:null,
+                _AutomateSubfolderCreation: null,
 
                 // Sharepoint: null,
 
@@ -1138,8 +1138,144 @@
                     //let tenantId = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=TenantID")).text()
                     //let secret = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=SecretKey")).text()
 
-                    if (currentUrl.includes("Plugin.aspx") && HeaderText == 'MarvalSoftware.Plugins.Sharepoint') {
+                    if (currentUrl.includes("Plugin.aspx") && HeaderText == 'MarvalSoftware.Plugins.Sharepoint') { //we are on plugins page
                         checkRequestActionMessageExists();
+                        let globalSettingsDiv = $("#ctl00_ctl00_cph_maintenance_globalSettingsFieldSet");
+                        let hiddenBox = $("#ctl00_ctl00_cph_maintenance_globalSettingsRepeater_ctl05_value");
+                        hiddenBox.hide()
+                        console.log("should be hidden but we can accesss its val ", hiddenBox.val());
+
+                        let nameDropdown = document.createElement("select");
+                        nameDropdown.id = "createFolderOptionSelect";
+                        
+
+                        const options = [
+                            { text: "None", value: "None" },
+                            { text: "MSM and Custom Attribute", value: "MSMAndCustomAttribute" },
+                            { text: "MSM", value: "MSM" },
+                            { text: "Custom Attribute", value: "CustomAttribute" }
+                        ];
+
+                        options.forEach((opt, idx) => { //builkd them
+                            const option = document.createElement("option");
+                            option.text = opt.text;
+                            option.value = opt.value;
+                            if (idx === 0) option.selected = true;
+                            nameDropdown.appendChild(option);
+                        });
+
+                        let storedValue = hiddenBox.val();
+                        if (storedValue) { //if stored value exists then 
+                            nameDropdown.value = storedValue; // selects the matching option if it exists
+                        } else {
+                            nameDropdown.value = "None"; // fallback/default
+                        }
+
+
+                        // Create the wrapper span
+                        let formSpan = document.createElement("span");
+                        formSpan.className = "formSpan";
+                        $("label.largeLabel").filter(function () {
+                            return $(this).text().trim() === "@@createFolderOption";
+                        }).hide(); // or .css("display", "none")
+
+                        // Create the labels
+                        let keyLabel = document.createElement("label");
+                        keyLabel.id = "ctl00_ctl00_cph_maintenance_globalSettingsRepeater_ctl06_key";
+                        keyLabel.className = "globalSettingKey";
+                        keyLabel.textContent = "@@EnforceReferences";
+
+                        let displayLabel = document.createElement("label");
+                        displayLabel.className = "largeLabel";
+                        displayLabel.textContent = "@@EnforceReferences";
+
+                        // Create the <select> - initially hidden input for ASP.NET compatibility
+                        let hiddenInput = document.createElement("input");
+                        hiddenInput.type = "hidden";
+                        hiddenInput.id = "ctl00_ctl00_cph_maintenance_globalSettingsRepeater_ctl06_value";
+                        hiddenInput.name = "ctl00$ctl00$cph$maintenance$globalSettingsRepeater$ctl06$value";
+                        hiddenInput.value = "None"; // Default value
+
+                        
+
+                        
+
+                        // Update hidden input when dropdown changes
+                        nameDropdown.addEventListener("change", function () {
+                            hiddenInput.value = this.value;
+                        });
+
+                        // Create the apply button
+                        let applyButton = document.createElement("button");
+                        applyButton.id = "applyButton";
+                        applyButton.type = "button"; // Prevent form submission
+                        applyButton.textContent = "Apply";
+
+                        applyButton.addEventListener("click", function () {
+                            let selectedValue = nameDropdown.value;
+                            
+                            console.log("selected value is ", selectedValue);
+                            hiddenBox.text(selectedValue);
+                            hiddenBox.val(selectedValue);
+
+                            // Update the hidden input with selected value
+                            hiddenInput.value = selectedValue;
+
+                            let fakeButton = $("#ctl00_ctl00_cph_apply_fakeApplyButton");
+                            fakeButton.click();
+
+                            // Create visible text input
+                            let textInput = document.createElement("input");
+                            textInput.type = "text";
+                            textInput.className = "text";
+                            textInput.value = selectedValue;
+                            textInput.addEventListener("input", function () {
+                                hiddenInput.value = this.value; // Keep hidden input synced
+                            });
+
+                            // Replace dropdown with text input
+                            nameDropdown.replaceWith(textInput);
+
+                            // Change apply button to "Edit"
+                            applyButton.textContent = "Edit";
+                            applyButton.onclick = function () {
+                                // Convert back into dropdown
+                                let newDropdown = nameDropdown.cloneNode(true);
+
+                                // Set dropdown to current value
+                                for (let option of newDropdown.options) {
+                                    if (option.value === hiddenInput.value) {
+                                        option.selected = true;
+                                        break;
+                                    }
+                                }
+
+                                // Re-add change listener
+                                newDropdown.addEventListener("change", function () {
+                                    hiddenInput.value = this.value;
+                                });
+
+                                textInput.replaceWith(newDropdown);
+
+                                // Restore the original apply functionality
+                                applyButton.textContent = "Apply";
+                                nameDropdown = newDropdown;
+
+                                // Restore original click handler
+                                applyButton.onclick = arguments.callee;
+                            };
+                        });
+
+                        // Add everything to the span
+                        formSpan.appendChild(keyLabel);
+                        formSpan.appendChild(displayLabel);
+                        formSpan.appendChild(nameDropdown);
+                        formSpan.appendChild(hiddenInput); // Add hidden input to form
+                        formSpan.appendChild(applyButton);
+
+                        // Append to the container - make sure it's inside the form
+                        globalSettingsDiv.append(formSpan);
+
 
                         function OpenInstallRequestRuleDialog() {
                             event.preventDefault();
@@ -1486,7 +1622,7 @@
                             getLatestPluginVersion();
                         });
                     }
-                    else if (!currentUrl.includes("Plugin.aspx")) {
+                    else if (!currentUrl.includes("Plugin.aspx")) { //not on plugin page
 
 
                         //fetchSharePointSites();
@@ -2205,12 +2341,21 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             checkbox.type = "checkbox";
                             checkbox.name = "selectAttachment";
                             checkbox.value = fileName;
+
+                            let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                            //uploadButton.style.display = "block";
+
+                            console.log("upload button ", uploadButton);
                             checkbox.setAttribute("data-attachment-id", noteInfo.id);
                             checkbox.onchange = function () {
                                 if (this.checked) {
                                     container.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
                                     container.style.transform = 'scale(1.02)';
+                                    uploadButton.style.display = "block";
+
                                 } else {
+                                    let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    uploadButton.style.display = "none";
                                     container.style.background = '';
                                     container.style.transform = '';
                                 }
@@ -2300,9 +2445,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 if (this.checked) {
                                     container.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
                                     container.style.transform = 'scale(1.02)';
+                                    let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    uploadButton.style.display = "block";
                                 } else {
                                     container.style.background = '';
                                     container.style.transform = '';
+                                    let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    uploadButton.style.display = "none";
                                 }
                             };
 
@@ -2343,10 +2492,32 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let isChecked = $("#createSubfolder").prop("checked");
                     let url = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
 
-                    let AutomateSubfolderCreation = await (await fetch(url)).text();
+                    let AutomateSubfolderCreation = "true"; //by default it is true
                     console.log("AutomateSubfolderCreation is ", AutomateSubfolderCreation);
-                    if (AutomateSubfolderCreation === "yes") {
-                        let response = await Sharepoint._createFolder("subfolder inside of a folder and yes");//creating where we last clicked!
+
+                    let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text(); //now we can get naming convention from bafckend
+                    console.log("naming convention is ", namingConvention);
+                    let folderName = "";
+
+                    switch (namingConvention) { //set name based on the convention
+                        case "MSM":
+                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
+                            break
+                        case "Custom Attribute":
+                            folderName = customAttribute;
+                            break
+                        case "MSMAndCustomAttribute":
+                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
+                            break
+                        default:
+                            AutomateSubfolderCreation = "false";
+                            break;
+                    }
+
+
+
+                    if (AutomateSubfolderCreation === "true") { //so if none is selected in the textbox then we dont need to create a subfolder and upload all files normallly
+                        let response = await Sharepoint._createFolder(folderName);//creating where we last clicked!
                         Sharepoint._currentPath += "/" + response.name;
 
                         //then we simply update the path and do the call
@@ -2465,13 +2636,27 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 customAttribute = "";
                             }
 
+                            let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")); //now we can get naming convention from bafckend
+                            console.log("naming convention is ", namingConvention);
+                            switch (namingConvention) { //set name based on the convention
+                                case "MSM":
+                                    folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
+                                    break
+                                case "Custom Attribute":
+                                    folderName = customAttribute;
+                                    break
+                                case "MSMAndCustomAttribute":
+                                    folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
+                                    break
+                            }
+
                             let payload = {
                                 microsoftToken: Sharepoint._microsoftToken,
                                 siteId: siteId,
                                 folderId: folderPath,
                                 combinedText: combinedContent,
                                 createSubfolder: isChecked,
-                                attachmentName: Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute + " Combined Notes.txt"//we will use .trim after to condense it //should probably make this changable for the user
+                                attachmentName: folderName + " Combined Notes.txt"//we will use .trim after to condense it //should probably make this changable for the user
                             };
 
                             try {
@@ -2740,11 +2925,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             // Attach the change handler directly
                             customRow.find(".email-checkbox").on("change", function () {
                                 if (this.checked) {
+                                    let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    uploadButton.style.display = "block";
                                     customRow.css({
                                         background: 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))',
                                         transform: 'scale(1.02)'
                                     });
                                 } else {
+                                    let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    uploadButton.style.display = "none";
                                     customRow.css({
                                         background: '',
                                         transform: ''
@@ -2755,61 +2944,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
 
 
-                        //console.log("emails feedback", emails);
-                        //// Clear existing rows (including the "(Empty)" row)
-                        //let notesDiv = window.top.document.getElementById("emailsDiv");
-                        //if (notesDiv) {
-                        //    console.log("notes div exists and we are appending to it", notesDiv);
-                        //}
-
-
-
-                        //// Clear old content
-                        //notesDiv.innerHTML = "";
-
-                        //// Loop through notes and create elements
-                        //notes.collection.items.forEach(note => {
-                        //    let noteInfo = note.entity.data;
-                        //    let fileName = `${noteInfo.type} ${noteInfo.createdOn} ${noteInfo.author.name}`;
-                        //    let summary = noteInfo.contentSummary;
-
-                        //    // Create a container for each note
-                        //    let container = document.createElement("div");
-                        //    container.className = "note-item";
-                        //    container.style.marginBottom = "12px";
-                        //    container.style.padding = "6px 0";
-                        //    container.style.borderBottom = "1px solid #ddd";
-
-                        //    // Create the checkbox
-                        //    let checkbox = document.createElement("input");
-                        //    checkbox.type = "checkbox";
-                        //    checkbox.name = "selectAttachment";
-                        //    checkbox.value = fileName;
-                        //    checkbox.setAttribute("data-attachment-id", noteInfo.id);
-                        //    //summaryDiv.className = "note-summary"; // <-- add this
-                        //    checkbox.style.marginRight = "8px";
-
-                        //    // Create the label
-                        //    let label = document.createElement("label");
-                        //    label.textContent = fileName;
-                        //    label.style.fontWeight = "bold";
-
-                        //    // Create a summary element
-                        //    let summaryDiv = document.createElement("div");
-                        //    summaryDiv.textContent = summary;
-                        //    summaryDiv.style.marginLeft = "26px"; // align under label text
-                        //    summaryDiv.style.color = "#555";
-                        //    summaryDiv.style.fontSize = "0.9em";
-                        //    summaryDiv.className = "note-summary"; // <-- add this
-
-                        //    // Append to container
-                        //    container.appendChild(checkbox);
-                        //    container.appendChild(label);
-                        //    container.appendChild(summaryDiv);
-
-                        //    // Append container to notes div
-                        //    notesDiv.appendChild(container);
-                        //});
 
 
                     } catch (ex) {
@@ -2823,6 +2957,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let folderName;
                     const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
 
+                    let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text(); //now we can get naming convention from bafckend
+                    console.log("naming convention is ", namingConvention);
+
+
+
 
                     //const customAttribute = await (await fetch(customAttributeUrl)).text();
                     let customAttribute = await Sharepoint._getAllCustomAttributeValue();
@@ -2831,12 +2970,32 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (customAttribute === null) {
                         customAttribute = "";
                     }
+
+                    switch (namingConvention) { //set name based on the convention
+                        case "MSM":
+                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
+                            break
+                        case "Custom Attribute":
+                            folderName = customAttribute;
+                            break
+                        case "MSMAndCustomAttribute":
+                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
+                            break
+                    }
+                    //let name = ""
+
                     console.log("we are getting here 2717");
                     if (name === null || name === "") {
-                        folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute; //we will use .trim after to condense it
-                    } else {
-                        folderName = name;
-                    }
+                        console.log("please enter a name ");
+                        //return;
+                        //folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute; //we will use .trim after to condense it
+                        //} else {
+                        //    folderName = name;
+                        //}
+                        name = folderName //if name is empty then we can set a default name
+
+
+                    } 
                     console.log("name is ", folderName)
 
                     try {
@@ -2849,7 +3008,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         //let name2 = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
 
 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + folderName.trim() + "&ReqId " + reqId;
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + name.trim() + "&ReqId " + reqId;
                         console.log("we are going to this create url ", url);
                         //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
@@ -3353,6 +3512,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let url = (new URLSearchParams(window.top.location.search)).get("id");
                     console.log(url);
 
+                    let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text(); //now we can get naming convention from bafckend
+                    console.log("naming convention is ", namingConvention);
+
                     let url3 = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
                     Sharepoint._AutomateSubfolderCreation = await(await fetch(_fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation")).text();
 
@@ -3464,6 +3626,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     };
 
                     itemsDiv.appendChild(uploadButtonTwo);
+                    uploadButtonTwo.style.display = "none"; //hide it 
 
                     // Combine Notes checkbox container
                     let combineNotesBox = document.createElement("div");
@@ -3567,6 +3730,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }
 
                         );
+                        //let directoryWindow = $("#ct100_overlay_id4");
+                        //directoryWindow.hide();
+
+                     //   console.log("directory window is ", directoryWindow)
                         this._renderElement();
                         //this._getAllAttachments();
                         //this._getAllNotes();
@@ -3597,6 +3764,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
+                    let directoryWindow = $("#ct100_overlay_id4");
+                    directoryWindow.hide();
                 },
 
                 _errorPopup: function (result) {
