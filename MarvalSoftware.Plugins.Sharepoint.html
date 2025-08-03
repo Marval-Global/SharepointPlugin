@@ -2284,15 +2284,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._createElement = this._element.querySelector(".action-buttons > button");
                     this._refreshLink = this._element.querySelector("a");
 
-                    //this.folderBtn = this._element.querySelector("#createFolder");
-                    //eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
-
-                    //this.saveButton = this._element.querySelector("#saveButton");
-                    //console.log("we should be calling upload alll now in render elementy");
-                    //eventManager.addHandler(this.saveButton, "click", function (e) {
-                    //    e.preventDefault();
-                    //    Sharepoint._uploadAllAttachments();
-                    //}, this);//probably need to ensure user has selected a path
 
                     let attachmentsPageButton = $("#AttachmentsPage");
                     //attachmentsPageButton.click
@@ -3124,6 +3115,44 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     };
                 },
 
+                _displaySelectedAttachments: function () {
+                    let finalWindow = $("#ct100_overlay_id6");
+
+                    // Clear existing content
+                    finalWindow.empty();
+
+                    // Create section containers
+                    let attachmentsSection = $("<div><h3>Attachments</h3></div>");
+                    let notesSection = $("<div><h3>Notes</h3></div>");
+                    let emailsSection = $("<div><h3>Emails</h3></div>");
+
+                    // Append checked attachments
+                    $("#attachmentsDiv input[type='checkbox']:checked").each(function () {
+                        let name = $(this).val();
+                        attachmentsSection.append(`<div>${name}</div>`);
+                    });
+
+                    // Append checked notes
+                    $("#notesDiv input[type='checkbox']:checked").each(function () {
+                        let noteText = $(this)
+                            .closest(".note2-item")
+                            .find(".note2-summary")
+                            .text()
+                            .trim();
+                        notesSection.append(`<div>${noteText}</div>`);
+                    });
+
+                    // Append checked emails
+                    $("#emailsDiv input[type='checkbox']:checked").each(function () {
+                        let subject = $(this).data("subject");
+                        emailsSection.append(`<div>${subject}</div>`);
+                    });
+
+                    // Add all sections to the final window
+                    finalWindow.append(attachmentsSection, notesSection, emailsSection);
+
+                },
+
 
                 //function createTreeItem(item, level = 0)
                 _createTreeItem: function (item, level) {
@@ -3538,6 +3567,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("we cannot find attachments div")
                     }
                 },
+                
 
                 // Initialize the tree
                 //renderTree();
@@ -3565,6 +3595,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemsDiv.id = "itemsDiv";
                     itemsDiv.className = "body";
                     itemsDiv.style.display = "block";
+
+
+                    let FinalDiv = document.createElement("div");
+                    FinalDiv.id = "FinalDiv";
+                    FinalDiv.className = "body";
+                    FinalDiv.style.display = "block";
 
                     function createSection(headerText, contentId) {
                         let section = document.createElement("div");
@@ -3658,17 +3694,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     let uploadButtonTwo = document.createElement("button");
                     uploadButtonTwo.id = "uploadButtonTwo";
-                    uploadButtonTwo.innerHTML = "🚀 Upload All";
+                    uploadButtonTwo.innerHTML = "🚀 Upload all22";
                     uploadButtonTwo.onclick = function (e) {//when we click upload all
                         e.preventDefault();
                         console.log("current path is ", Sharepoint._currentPath)
                         if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
-                            console.log("current pRTH IS NULL")
+                            console.log("current pRTH IS NULL hi")
                             let directoryWindow = $("#ct100_overlay_id4");
                             directoryWindow.show();
                             $("#ct100_overlay_id5").hide();
+                            console.log("should be displaying all attachments")
+                            Sharepoint._displaySelectedAttachments();
                         } else {
                             console.log("current paqth is not empty")
+
                             //Sharepoint._uploadAllAttachments(e);we can do this on the other window
                         }
                         
@@ -3707,18 +3746,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                         const uploadButton = document.getElementById('uploadButtonTwo');
 
-                        //checkboxes.forEach(checkbox => {
-                        //    checkbox.addEventListener('change', function () {
-                        //        const parent = this.closest('.note-item, .email-row, .attachment-item');
-                        //        if (this.checked) {
-                        //            parent.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
-                        //            parent.style.transform = 'scale(1.02)';
-                        //        } else {
-                        //            parent.style.background = '';
-                        //            parent.style.transform = '';
-                        //        }
-                        //    });
-                        //});
 
                         uploadButton.addEventListener('click', function () { 
                             const checkedItems = document.querySelectorAll('input[type="checkbox"]:checked');
@@ -3772,14 +3799,23 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             isResizable: true,
                             isMaximizable: true,
                             bodyElement: itemsDiv,
-                            //position: absolute,
-                            //top: 500,
-                            //left: 500,
-                            //position: relative,
 
                         }
 
+
                         );
+                        this.finalWindow = new MarvalSoftware.UI.Window({
+                            appendToElement: window.top.document.getElementById("aspnetForm"),
+                            title: "Window",
+                            height: 1000,
+                            width: 1000,
+                            minHeight: 300,
+                            minWidth: 300,
+                            isResizable: true,
+                            isMaximizable: true,
+                            bodyElement: FinalDiv,
+
+                        });
                         //let directoryWindow = $("#ct100_overlay_id4");
                         //directoryWindow.hide();
 
@@ -3800,23 +3836,64 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
 
                     this._attachmentsWindow.centerToViewport();
-
+                    //likelyu hidden by default
                     this._pluginWindow.show();
                     this._attachmentsWindow.show();
+                    this.finalWindow.show();
                     this._getAllEmails();
 
                     setTimeout(200);
                     //this._renderAttachmentsWindow();
                     this._getAllNotes();
                     this._getAllAttachments();
+                    this._displaySelectedAttachments();
 
                     let uploadButton = $('#saveButton');
                     if (uploadButton.length > 0) {
                         console.log("save button deos exist ", uploadButton)
                         uploadButton.click(function (e) {
                             e.preventDefault();
+                            let finalWindow = $("#ct100_overlay_id6");
+                            console.log("window final is ", finalWindow);
+                            finalWindow.innerText = "Hi";
+
+                            // Clear existing content
+                            //finalWindow.empty();
+
+                            // Create section containers
+                            let attachmentsSection = $("<div><h3>Attachments</h3></div>");
+                            let notesSection = $("<div><h3>Notes</h3></div>");
+                            let emailsSection = $("<div><h3>Emails</h3></div>");
+
+                            // Append checked attachments
+                            $("#attachmentsDiv input[type='checkbox']:checked").each(function () {
+                                let name = $(this).val();
+                                attachmentsSection.append(`<div>${name}</div>`);
+                            });
+
+                            // Append checked notes
+                            $("#notesDiv input[type='checkbox']:checked").each(function () {
+                                let noteText = $(this)
+                                    .closest(".note2-item")
+                                    .find(".note2-summary")
+                                    .text()
+                                    .trim();
+                                notesSection.append(`<div>${noteText}</div>`);
+                            });
+
+                            // Append checked emails
+                            $("#emailsDiv input[type='checkbox']:checked").each(function () {
+                                let subject = $(this).data("subject");
+                                emailsSection.append(`<div>${subject}</div>`);
+                            });
+
+                            // Add all sections to the final window
+                            finalWindow.append(attachmentsSection, notesSection, emailsSection);
+
+
                             // Your code here
-                            Sharepoint._uploadAllAttachments();
+                            //Sharepoint._uploadAllAttachments();
+
                         });
                     } else {
                         console.log("saveButton element not found");
@@ -3847,7 +3924,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     } else {
                         console.log("cannot find button");
                     }
-                    
+                    //this._finalPopup();
 
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
@@ -4263,6 +4340,33 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }.bind(this)
                     });
                 },
+                _finalPopup: function () {
+                    console.log("final popup should be caled")
+                    document.addEventListener('DOMContentLoaded', function () {
+
+                        this.finalWindow = new MarvalSoftware.UI.Window({
+                            appendToElement: window.top.document.getElementById("aspnetForm"),
+                            title: "Attachments",
+                            height: 1000,
+                            width: 1000,
+                            minHeight: 300,
+                            minWidth: 300,
+                            isResizable: true,
+                            isMaximizable: true,
+                            bodyElement: itemsDiv
+                        }); // ✅ fixed: closed the object + constructor call
+
+                        this._renderElement();
+                        this._fetchSharePointSites();
+                        // this._renderAttachmentsWindow();
+
+                        //if (eventTarget != undefined) {
+                        //    console.log(eventTarget.parentElement.parentElement.nextSibling.innerText);
+                        //}
+                        this._attachmentsWindow.centerToViewport();
+                    }.bind(this)); // ✅ Important: bind `this` so it works inside DOMContentLoaded
+                },
+
 
                 _update: function (value) {
                     this._sendInProgress = true;
