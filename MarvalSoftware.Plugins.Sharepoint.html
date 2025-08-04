@@ -2461,7 +2461,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         return;
                     }
 
-                    // Helper function to build a section
                     function _buildSection(title, checkboxes) {
                         if (checkboxes.length === 0) return;
 
@@ -2473,9 +2472,24 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         section.appendChild(header);
 
                         checkboxes.each(function () {
+                            const container = this.closest(".note2-item") || this.closest(".email-item") || this.closest(".attachment-item");
+
                             const label = document.createElement("div");
                             label.className = "selected-item";
-                            label.textContent = this.getAttribute("data-label") || this.value || "Unnamed Item";
+
+                            const itemTitle = this.getAttribute("data-label") || this.value || "Unnamed Item";
+
+                            let summaryText = "";
+                            if (container) {
+                                const summaryEl = container.querySelector(".note2-summary, .email-summary, .attachment-summary");
+                                if (summaryEl) {
+                                    summaryText = summaryEl.textContent.trim();
+                                }
+                            }
+
+                            // Format: Title (summary text)
+                            label.textContent = summaryText ? `${itemTitle}: ${summaryText}` : itemTitle;
+
                             section.appendChild(label);
                         });
 
@@ -3613,7 +3627,26 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     let finalUploadButton = document.createElement("button");
                     finalUploadButton.innerText = "upload final";
+                    finalUploadButton.id = "finalButton";
                     FinalDiv.appendChild(finalUploadButton);
+
+                    let goBack = document.createElement("button");
+                    goBack.innerText = "go back final";
+                    goBack.id = "goBack";
+                    FinalDiv.appendChild(goBack);
+
+                    finalUploadButton.onclick = function (e) {
+                        e.preventDefault();
+                        Sharepoint._uploadAllAttachments();
+                    }
+
+                    goBack.onclick = function (e) {
+                        e.preventDefault();//gop back
+                        self._pluginWindow.render();
+                        self._pluginWindow.centerToViewport();
+                        self._pluginWindow.show();
+                        self.finalWindow._closeButtonElement_click();
+                    }
 
                     FinalDiv.appendChild(testDiv);
 
