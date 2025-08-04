@@ -2288,11 +2288,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let attachmentsPageButton = $("#AttachmentsPage");
                     //attachmentsPageButton.click
 
-                    attachmentsPageButton.click(function (e) {
-                        e.preventDefault();
-                        // Your code here
-                        Sharepoint._uploadAllAttachments();
-                    });
+                    //attachmentsPageButton.click(function (e) {
+                    //    e.preventDefault();
+                        
+                    //    //Sharepoint._uploadAllAttachments();
+                    //});
 
                     this.siteSelected = this._element.querySelector("#sitesDropdown");
                     eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
@@ -3121,6 +3121,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     // Clear existing content
                     finalWindow.empty();
 
+                    // let containerDiv = document.createElement("div");
+                    let containerDiv = $("<div></div>"); 
+
                     // Create section containers
                     let attachmentsSection = $("<div><h3>Attachments</h3></div>");
                     let notesSection = $("<div><h3>Notes</h3></div>");
@@ -3148,8 +3151,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         emailsSection.append(`<div>${subject}</div>`);
                     });
 
-                    // Add all sections to the final window
-                    finalWindow.append(attachmentsSection, notesSection, emailsSection);
+                    containerDiv.append(attachmentsSection);
+                    containerDiv.append(notesSection);
+                    containerDiv.append(emailsSection);
+                    finalWindow.append(containerDiv);
 
                 },
 
@@ -3692,30 +3697,34 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
 
-                    let uploadButtonTwo = document.createElement("button");
-                    uploadButtonTwo.id = "uploadButtonTwo";
-                    uploadButtonTwo.innerHTML = "🚀 Upload all22";
-                    uploadButtonTwo.onclick = function (e) {//when we click upload all
-                        e.preventDefault();
-                        console.log("current path is ", Sharepoint._currentPath)
-                        if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
-                            console.log("current pRTH IS NULL hi")
-                            let directoryWindow = $("#ct100_overlay_id4");
-                            directoryWindow.show();
-                            $("#ct100_overlay_id5").hide();
-                            console.log("should be displaying all attachments")
-                            Sharepoint._displaySelectedAttachments();
-                        } else {
-                            console.log("current paqth is not empty")
+                    //let uploadButtonTwo = document.createElement("button");
+                    //uploadButtonTwo.id = "uploadButtonTwo";
+                    //uploadButtonTwo.innerHTML = "🚀 Upload all22";
+                    //uploadButtonTwo.onclick = function (e) {//when we click upload all
+                    //    e.preventDefault();
+                    //    console.log("current path is ", Sharepoint._currentPath)
+                    //    if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
+                    //        console.log("current pRTH IS NULL hi")
+                    //        let directoryWindow = $("#ct100_overlay_id4");
+                    //        directoryWindow.css("z-index", 1000000);
+                    //        directoryWindow.show();
+                    //        //this = window.top.document.getElementById("ct100_overlay_id5");
+                    //        console.log("this is ", this);
+                    //        window.top.document.getElementById("ct100_overlay_id5")._closeButtonElement_click();
 
-                            //Sharepoint._uploadAllAttachments(e);we can do this on the other window
-                        }
+                    //        console.log("should be displaying all attachments")
+                    //        Sharepoint._displaySelectedAttachments();
+                    //    } else {
+                    //        console.log("current paqth is not empty")
+
+                    //        //Sharepoint._uploadAllAttachments(e);we can do this on the other window
+                    //    }
                         
-                    };
+                    //};
 
                   
-                    itemsDiv.appendChild(uploadButtonTwo);
-                    uploadButtonTwo.style.display = "none"; //hide it 
+                    //itemsDiv.appendChild(uploadButtonTwo);
+                    //uploadButtonTwo.style.display = "none"; //hide it 
 
                     // Combine Notes checkbox container
                     let combineNotesBox = document.createElement("div");
@@ -3742,34 +3751,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemsDiv.appendChild(combineNotesBox);
                     console.log("items div is ", itemsDiv);
 
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-                        const uploadButton = document.getElementById('uploadButtonTwo');
-
-
-                        uploadButton.addEventListener('click', function () { 
-                            const checkedItems = document.querySelectorAll('input[type="checkbox"]:checked');
-                            if (checkedItems.length > 0) {
-                                this.textContent = `✅ Uploading ${checkedItems.length} items...`;
-                                this.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-
-                                setTimeout(() => {
-                                    this.textContent = '🎉 Upload Complete!';
-                                    setTimeout(() => {
-                                        this.textContent = '🚀 Upload All';
-                                        this.style.background = '';
-                                    }, 2000);
-                                }, 1500);
-                            } else {
-                                this.textContent = '⚠️ Select items first';
-                                this.style.background = 'linear-gradient(135deg, #ff9800, #f57c00)';
-                                setTimeout(() => {
-                                    this.textContent = '🚀 Upload All';
-                                    this.style.background = '';
-                                }, 2000);
-                            }
-                        });
-                    });
+                    
 
                     //let eventElement = eventTarget);
                     if (!this._pluginWindow) {
@@ -3819,6 +3801,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         //let directoryWindow = $("#ct100_overlay_id4");
                         //directoryWindow.hide();
 
+
+                        
+
+
                      //   console.log("directory window is ", directoryWindow)
                         this._renderElement();
                         //this._getAllAttachments();
@@ -3835,15 +3821,46 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this._pluginWindow.centerToViewport();
                     }
 
-                    this._attachmentsWindow.centerToViewport();
+                    let self = this;
                     //likelyu hidden by default
                     this._pluginWindow.show();
                     this._attachmentsWindow.show();
+                    this._attachmentsWindow.centerToViewport();
+                    let uploadButtonTwo = document.createElement("button");
+                    uploadButtonTwo.id = "uploadButtonTwo";
+                    uploadButtonTwo.innerHTML = "🚀 Upload all22";
+                    uploadButtonTwo.onclick = function (e) {//when we click upload all
+                        e.preventDefault();
+                        console.log("current path is ", Sharepoint._currentPath)
+                        if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
+                            console.log("current pRTH IS NULL hi")
+                            let directoryWindow = $("#ct100_overlay_id4");
+                            directoryWindow.css("z-index", 1000000);
+                            directoryWindow.show();
+                            self._pluginWindow.centerToViewport();
+                            //this = window.top.document.getElementById("ct100_overlay_id5");
+                            //console.log("this is ", this._attachmentsWindow);
+                            self._attachmentsWindow._closeButtonElement_click(e);
+
+                            console.log("should be displaying all attachments")
+                            Sharepoint._displaySelectedAttachments();
+                        } else {
+                            console.log("current paqth is not empty")
+
+                            //Sharepoint._uploadAllAttachments(e);we can do this on the other window
+                        }
+
+                    };
+                    itemsDiv.appendChild(uploadButtonTwo);
+                    uploadButtonTwo.style.display = "none"; //hide it 
                     this.finalWindow.show();
+                    
+                    //this.finalWindow.centerToViewport();
                     this._getAllEmails();
 
                     setTimeout(200);
                     //this._renderAttachmentsWindow();
+                    console.log("should be calling get all emails and notes etc")
                     this._getAllNotes();
                     this._getAllAttachments();
                     this._displaySelectedAttachments();
@@ -3900,6 +3917,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
                     let directoryWindow = $("#ct100_overlay_id4");
                     let attachmentWindowButton = $("#AttachmentsPage");
+                    attachmentWindowButton.on("click", function () {
+                        console.log("we clicked onm attachment window button")
+                        self._attachmentsWindow.render();
+                        self._attachmentsWindow.centerToViewport();
+                        self._attachmentsWindow.show();
+                    })
+
                     if (attachmentWindowButton.length > 0) {
                         attachmentWindowButton.click(function (e) {
                             e.preventDefault();
