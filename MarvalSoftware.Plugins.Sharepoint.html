@@ -1128,7 +1128,8 @@
                 _SuggestDirectoryName: null,
                 _createFolderOption: null,
                 _AutomateSubfolderCreation: null,
-
+                _isLoginInProgress: false,
+                _loginPromise: null,
                 // Sharepoint: null,
 
 
@@ -1169,7 +1170,7 @@
 
                         let nameDropdown = document.createElement("select");
                         nameDropdown.id = "createFolderOptionSelect";
-                        
+
 
                         const options = [
                             { text: "None", value: "None" },
@@ -1218,9 +1219,9 @@
                         hiddenInput.name = "ctl00$ctl00$cph$maintenance$globalSettingsRepeater$ctl06$value";
                         hiddenInput.value = "None"; // Default value
 
-                        
 
-                        
+
+
 
                         // Update hidden input when dropdown changes
                         nameDropdown.addEventListener("change", function () {
@@ -1235,7 +1236,7 @@
 
                         applyButton.addEventListener("click", function () {
                             let selectedValue = nameDropdown.value;
-                            
+
                             console.log("selected value is ", selectedValue);
                             hiddenBox.text(selectedValue);
                             hiddenBox.val(selectedValue);
@@ -1727,83 +1728,6 @@
                         }
                     }
 
-                    async function getMicrosoftAccessToken() {
-                        try {
-                            // Get the Client ID from your SharePoint handler or hardcode it here
-                            const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
-
-                            const clientId = await (await fetch(clientIdUrl)).text();
-                            console.log("client id is:", clientId);
-
-                            const msalInstance = await msal.createStandardPublicClientApplication({
-                                auth: {
-                                    clientId: clientId,
-                                    authority: "https://login.microsoftonline.com/common"
-                                }
-                            });
-
-                            const loginRequest = {
-                                scopes: ["https://graph.microsoft.com/.default"]
-                            };
-
-                            const response = await msalInstance.loginPopup(loginRequest);
-
-                            console.log("Logged in successfully, access token:", response.accessToken);
-                            Sharepoint._microsoftToken = response.accessToken;
-                            return response.accessToken;
-
-                        } catch (err) {
-                            console.error("MSAL login failed:", err);
-                            throw err;
-                        }
-                    }
-
-
-                    async function fetchSharePointSites() {
-                        //Sharepoint._getAuth();
-                        console.log("we are calling fetchsharepointsites");
-                        let apptoken = await getMicrosoftAccessToken();
-                        //console.log("apptoken is:", apptoken);
-                        try {
-                            //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
-
-                            //  console.log("apptoken is:", apptoken);
-                            const response = await fetch(_fullPluginPathHandler + "?endpoint=getSites", {
-                                method: "POST",
-                                "headers": [["content-type", "application/json"]],
-                                body: JSON.stringify({
-                                    "apptoken": apptoken,
-                                    endpoint: "getSites"
-                                })
-                                // headers:{'apptoken':apptoken}
-
-                            });
-                            let sitesJson = await response.json()
-
-                            console.log("Sharepoint sites are: ", sitesJson);
-
-                            console.log("we should be appending sites now");
-                            let $dropdown = $('#sitesDropdown');
-                            if ($dropdown) {
-                                console.log("sites dropdown does exist");
-                            }
-                            $dropdown.empty();
-                            $dropdown.append('<option value = "">Please Select A Website To Upload </option>');
-
-                            sitesJson.value.forEach(site => {
-                                //console.log("site here is", site);
-                                $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
-                            });
-                            console.log("appending should finish!");
-
-                            ; //in theory should have all our sites if response is correct
-
-
-                        } catch (error) {
-                            console.log("Error fetching sites: ", error);
-                        }
-                    }
-
 
 
 
@@ -2103,7 +2027,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     } catch (error) {
                         console.log("Error fetching sites: ", error);
                     }
-                },
+                }
+            
+            ,
                 _getAuth: async function () {
 
                     let hostString = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ChatbotHostOverride")).text()
@@ -2204,7 +2130,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 this._errorPopup(result);
                             }
                             else {
-                                this._popup();
+                                //this._popup();
                             }
                         }.bind(this)
                     });
@@ -2241,11 +2167,34 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 //},
 
                 _getMicrosoftAccessToken2: async function () {
+                    // If we already have a valid token, return it
+                    if (Sharepoint._microsoftToken) {
+                        return Sharepoint._microsoftToken;
+                    }
+
+                    // If login is already in progress, return the existing promise
+                    if (Sharepoint._loginPromise) {
+                        console.warn("Login already in progress, waiting for completion...");
+                        return await Sharepoint._loginPromise;
+                    }
+
+                    // Create and store the login promise
+                    Sharepoint._loginPromise = this._performLogin();
+
+                    try {
+                        const token = await Sharepoint._loginPromise;
+                        return token;
+                    } finally {
+                        // Clear the promise when done (success or failure)
+                        Sharepoint._loginPromise = null;
+                    }
+                },
+
+                _performLogin: async function () {
                     try {
                         // Get the Client ID from your SharePoint handler or hardcode it here
-                        const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
-                        console.log("clientIdUrl")
-
+                        const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID";
+                        console.log("clientIdUrl");
                         const clientId = await (await fetch(clientIdUrl)).text();
                         console.log("client id is:", clientId);
 
@@ -2261,8 +2210,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         };
 
                         const response = await msalInstance.loginPopup(loginRequest);
-
                         console.log("Logged in successfully, access token:", response.accessToken);
+
                         Sharepoint._microsoftToken = response.accessToken;
                         return response.accessToken;
 
@@ -2503,6 +2452,51 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.error("we have error", ex);
                     }
 
+                },
+                _appendSelectedItemsToFinalDiv: function () {
+                    const FinalDiv = window.top.document.getElementById("FinalDiv");
+
+                    if (!FinalDiv) {
+                        console.warn("FinalDiv not found.");
+                        return;
+                    }
+
+                    // Helper function to build a section
+                    function _buildSection(title, checkboxes) {
+                        if (checkboxes.length === 0) return;
+
+                        const section = document.createElement("div");
+                        section.className = "selected-section";
+
+                        const header = document.createElement("h3");
+                        header.textContent = title;
+                        section.appendChild(header);
+
+                        checkboxes.each(function () {
+                            const label = document.createElement("div");
+                            label.className = "selected-item";
+                            label.textContent = this.getAttribute("data-label") || this.value || "Unnamed Item";
+                            section.appendChild(label);
+                        });
+
+                        FinalDiv.appendChild(section);
+                    }
+
+                    // Gather selected checkboxes
+                    const selectedNotes = $("#notesDiv input[type='checkbox']:checked");
+                    const selectedEmails = $("#emailsDiv input[type='checkbox']:checked");
+                    const selectedAttachments = $("#attachmentsDiv input[type='checkbox']:checked");
+
+                    let folderPath = Sharepoint._currentPath;
+                    let pathDiv = document.createElement("div");
+                    pathDiv.innerText = folderPath;
+
+                    FinalDiv.appendChild(pathDiv);
+
+                    // Build sections and append them
+                    _buildSection("📝 Selected Notes", selectedNotes);
+                    _buildSection("📧 Selected Emails", selectedEmails);
+                    _buildSection("📎 Selected Attachments", selectedAttachments);
                 },
                 _uploadAllAttachments: async function (sender, e) {
                     //e.preventDefault();
@@ -3116,45 +3110,51 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 },
 
                 _displaySelectedAttachments: function () {
-                    let finalWindow = $("#ct100_overlay_id6");
+                    let finalWindow = window.top.document.getElementById("ct100_overlay_id6");
+                    let test = document.createElement("div");
+                    test.innerText = "hi";
+                    finalWindow.appendChild(test);
 
-                    // Clear existing content
-                    finalWindow.empty();
+                    //let finalWindow = $("#ct100_overlay_id6");
 
-                    // let containerDiv = document.createElement("div");
-                    let containerDiv = $("<div></div>"); 
+                    //// Clear existing content
+                    //finalWindow.empty();
 
-                    // Create section containers
-                    let attachmentsSection = $("<div><h3>Attachments</h3></div>");
-                    let notesSection = $("<div><h3>Notes</h3></div>");
-                    let emailsSection = $("<div><h3>Emails</h3></div>");
 
-                    // Append checked attachments
-                    $("#attachmentsDiv input[type='checkbox']:checked").each(function () {
-                        let name = $(this).val();
-                        attachmentsSection.append(`<div>${name}</div>`);
-                    });
+                    //// let containerDiv = document.createElement("div");
+                    //let containerDiv = $("<div></div>"); 
 
-                    // Append checked notes
-                    $("#notesDiv input[type='checkbox']:checked").each(function () {
-                        let noteText = $(this)
-                            .closest(".note2-item")
-                            .find(".note2-summary")
-                            .text()
-                            .trim();
-                        notesSection.append(`<div>${noteText}</div>`);
-                    });
+                    //// Create section containers
+                    //let attachmentsSection = $("<div><h3>Attachments</h3></div>");
+                    //let notesSection = $("<div><h3>Notes</h3></div>");
+                    //let emailsSection = $("<div><h3>Emails</h3></div>");
 
-                    // Append checked emails
-                    $("#emailsDiv input[type='checkbox']:checked").each(function () {
-                        let subject = $(this).data("subject");
-                        emailsSection.append(`<div>${subject}</div>`);
-                    });
+                    //// Append checked attachments
+                    //$("#attachmentsDiv input[type='checkbox']:checked").each(function () {
+                    //    let name = $(this).val();
+                    //    attachmentsSection.append(`<div>${name}</div>`);
+                    //});
 
-                    containerDiv.append(attachmentsSection);
-                    containerDiv.append(notesSection);
-                    containerDiv.append(emailsSection);
-                    finalWindow.append(containerDiv);
+                    //// Append checked notes
+                    //$("#notesDiv input[type='checkbox']:checked").each(function () {
+                    //    let noteText = $(this)
+                    //        .closest(".note2-item")
+                    //        .find(".note2-summary")
+                    //        .text()
+                    //        .trim();
+                    //    notesSection.append(`<div>${noteText}</div>`);
+                    //});
+
+                    //// Append checked emails
+                    //$("#emailsDiv input[type='checkbox']:checked").each(function () {
+                    //    let subject = $(this).data("subject");
+                    //    emailsSection.append(`<div>${subject}</div>`);
+                    //});
+
+                    //containerDiv.append(attachmentsSection);
+                    //containerDiv.append(notesSection);
+                    //containerDiv.append(emailsSection);
+                    //finalWindow.append(containerDiv);
 
                 },
 
@@ -3606,6 +3606,16 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     FinalDiv.id = "FinalDiv";
                     FinalDiv.className = "body";
                     FinalDiv.style.display = "block";
+                    FinalDiv.innerText = "hi this is the final div!";
+                    let testDiv = document.createElement("div");
+                    testDiv.innerText = "test div";
+                    testDiv.id = "testDiv";
+
+                    let finalUploadButton = document.createElement("button");
+                    finalUploadButton.innerText = "upload final";
+                    FinalDiv.appendChild(finalUploadButton);
+
+                    FinalDiv.appendChild(testDiv);
 
                     function createSection(headerText, contentId) {
                         let section = document.createElement("div");
@@ -3693,38 +3703,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let attachmentsSection = createSection("📎 Attachments", "attachmentsDiv");
                     itemsDiv.appendChild(attachmentsSection);
 
-                    // Upload All button
 
-
-
-                    //let uploadButtonTwo = document.createElement("button");
-                    //uploadButtonTwo.id = "uploadButtonTwo";
-                    //uploadButtonTwo.innerHTML = "🚀 Upload all22";
-                    //uploadButtonTwo.onclick = function (e) {//when we click upload all
-                    //    e.preventDefault();
-                    //    console.log("current path is ", Sharepoint._currentPath)
-                    //    if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
-                    //        console.log("current pRTH IS NULL hi")
-                    //        let directoryWindow = $("#ct100_overlay_id4");
-                    //        directoryWindow.css("z-index", 1000000);
-                    //        directoryWindow.show();
-                    //        //this = window.top.document.getElementById("ct100_overlay_id5");
-                    //        console.log("this is ", this);
-                    //        window.top.document.getElementById("ct100_overlay_id5")._closeButtonElement_click();
-
-                    //        console.log("should be displaying all attachments")
-                    //        Sharepoint._displaySelectedAttachments();
-                    //    } else {
-                    //        console.log("current paqth is not empty")
-
-                    //        //Sharepoint._uploadAllAttachments(e);we can do this on the other window
-                    //    }
-                        
-                    //};
-
-                  
-                    //itemsDiv.appendChild(uploadButtonTwo);
-                    //uploadButtonTwo.style.display = "none"; //hide it 
 
                     // Combine Notes checkbox container
                     let combineNotesBox = document.createElement("div");
@@ -3798,11 +3777,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             bodyElement: FinalDiv,
 
                         });
-                        //let directoryWindow = $("#ct100_overlay_id4");
-                        //directoryWindow.hide();
-
-
-                        
 
 
                      //   console.log("directory window is ", directoryWindow)
@@ -3831,19 +3805,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     uploadButtonTwo.innerHTML = "🚀 Upload all22";
                     uploadButtonTwo.onclick = function (e) {//when we click upload all
                         e.preventDefault();
-                        console.log("current path is ", Sharepoint._currentPath)
+                        console.log("current path is and we are calling prevenmt default ", Sharepoint._currentPath)
                         if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
-                            console.log("current pRTH IS NULL hi")
+                            console.log("current pRTH IS NUbuefdueuhehuieihjeLL hi")
                             let directoryWindow = $("#ct100_overlay_id4");
                             directoryWindow.css("z-index", 1000000);
                             directoryWindow.show();
                             self._pluginWindow.centerToViewport();
+                            console.log("should be displaying all attachments")
+                            //Sharepoint._displaySelectedAttachments();
                             //this = window.top.document.getElementById("ct100_overlay_id5");
                             //console.log("this is ", this._attachmentsWindow);
-                            self._attachmentsWindow._closeButtonElement_click(e);
+                            self._attachmentsWindow._closeButtonElement_click();
 
-                            console.log("should be displaying all attachments")
-                            Sharepoint._displaySelectedAttachments();
+                            
                         } else {
                             console.log("current paqth is not empty")
 
@@ -3853,76 +3828,52 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     };
                     itemsDiv.appendChild(uploadButtonTwo);
                     uploadButtonTwo.style.display = "none"; //hide it 
-                    this.finalWindow.show();
+                    //this.finalWindow.render();
+                   // this.finalWindow.centerToViewport();
+                  //  this.finalWindow.show();
                     
                     //this.finalWindow.centerToViewport();
                     this._getAllEmails();
 
-                    setTimeout(200);
+                    //setTimeout(200);
                     //this._renderAttachmentsWindow();
                     console.log("should be calling get all emails and notes etc")
                     this._getAllNotes();
                     this._getAllAttachments();
-                    this._displaySelectedAttachments();
+                    //this._displaySelectedAttachments();
 
                     let uploadButton = $('#saveButton');
                     if (uploadButton.length > 0) {
-                        console.log("save button deos exist ", uploadButton)
-                        uploadButton.click(function (e) {
+                        console.log("can find upload button")
+                        uploadButton.on("click", function (e) {
+                            console.log("clicking on button")
                             e.preventDefault();
-                            let finalWindow = $("#ct100_overlay_id6");
-                            console.log("window final is ", finalWindow);
-                            finalWindow.innerText = "Hi";
-
-                            // Clear existing content
-                            //finalWindow.empty();
-
-                            // Create section containers
-                            let attachmentsSection = $("<div><h3>Attachments</h3></div>");
-                            let notesSection = $("<div><h3>Notes</h3></div>");
-                            let emailsSection = $("<div><h3>Emails</h3></div>");
-
-                            // Append checked attachments
-                            $("#attachmentsDiv input[type='checkbox']:checked").each(function () {
-                                let name = $(this).val();
-                                attachmentsSection.append(`<div>${name}</div>`);
-                            });
-
-                            // Append checked notes
-                            $("#notesDiv input[type='checkbox']:checked").each(function () {
-                                let noteText = $(this)
-                                    .closest(".note2-item")
-                                    .find(".note2-summary")
-                                    .text()
-                                    .trim();
-                                notesSection.append(`<div>${noteText}</div>`);
-                            });
-
-                            // Append checked emails
-                            $("#emailsDiv input[type='checkbox']:checked").each(function () {
-                                let subject = $(this).data("subject");
-                                emailsSection.append(`<div>${subject}</div>`);
-                            });
-
-                            // Add all sections to the final window
-                            finalWindow.append(attachmentsSection, notesSection, emailsSection);
-
-
-                            // Your code here
-                            //Sharepoint._uploadAllAttachments();
-
+                            //Sharepoint._appendSelectedItemsToFinalDiv();
+                            //seems that we need to  render second window then open third window
+                            self.finalWindow.render();
+                            self.finalWindow.centerToViewport();
+                            self.finalWindow.show();
+                            Sharepoint._appendSelectedItemsToFinalDiv();
+                            self._pluginWindow._closeButtonElement_click();
                         });
                     } else {
-                        console.log("saveButton element not found");
+                        console.warn("#saveButton not found at the time of binding.");
                     }
+
+
+                    
                     let directoryWindow = $("#ct100_overlay_id4");
                     let attachmentWindowButton = $("#AttachmentsPage");
-                    attachmentWindowButton.on("click", function () {
+                    attachmentWindowButton.on("click", function (e) {
                         console.log("we clicked onm attachment window button")
+                        e.preventDefault();
                         self._attachmentsWindow.render();
                         self._attachmentsWindow.centerToViewport();
                         self._attachmentsWindow.show();
                     })
+
+                    //let finalWindowStuff = $("<div><h3>final stgyuff</h3></div>");
+                    //this.finalWindow.append(finalWindowStuff);
 
                     if (attachmentWindowButton.length > 0) {
                         attachmentWindowButton.click(function (e) {
@@ -4174,7 +4125,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 this._errorPopup(result);
                             }
                             else {
-                                this._popup();
+                                //this._popup();
                             }
                         }.bind(this)
                     });
@@ -4381,7 +4332,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }); // ✅ fixed: closed the object + constructor call
 
                         this._renderElement();
-                        this._fetchSharePointSites();
+                        //this._fetchSharePointSites();
                         // this._renderAttachmentsWindow();
 
                         //if (eventTarget != undefined) {
