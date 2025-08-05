@@ -345,6 +345,7 @@
             margin: 15px;
             animation: gradientShift 3s ease infinite;
         }
+
         #saveButton {
             height: 40px;
             background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
@@ -918,7 +919,7 @@
 
     <select id="sitesDropdown"><option>Loading!</option></select>
     <!--<select id="foldersDropdown"><option>Still loading!</option></select>-->
-    <div id="successMessage">Success Message</div>
+    <!--<div id="successMessage">Success Message</div>-->
 
 
     <div id="selectedFolder">Current Folder Path</div>
@@ -1130,6 +1131,7 @@
                 _AutomateSubfolderCreation: null,
                 _isLoginInProgress: false,
                 _loginPromise: null,
+                _attachmentCounter: 0,
                 // Sharepoint: null,
 
 
@@ -1188,7 +1190,7 @@
                         });
 
                         let storedValue = hiddenBox.val();
-                        if (storedValue) { //if stored value exists then 
+                        if (storedValue) { //if stored value exists then
                             nameDropdown.value = storedValue; // selects the matching option if it exists
                         } else {
                             nameDropdown.value = "None"; // fallback/default
@@ -2028,8 +2030,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("Error fetching sites: ", error);
                     }
                 }
-            
-            ,
+
+                ,
                 _getAuth: async function () {
 
                     let hostString = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ChatbotHostOverride")).text()
@@ -2239,7 +2241,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     //attachmentsPageButton.click(function (e) {
                     //    e.preventDefault();
-                        
+
                     //    //Sharepoint._uploadAllAttachments();
                     //});
 
@@ -2326,16 +2328,26 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             console.log("upload button ", uploadButton);
                             checkbox.setAttribute("data-attachment-id", noteInfo.id);
                             checkbox.onchange = function () {
+                               
                                 if (this.checked) {
                                     container.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
                                     container.style.transform = 'scale(1.02)';
-                                    uploadButton.style.display = "block";
+                                    Sharepoint._attachmentCounter++;
+                                    //uploadButton.style.display = "block";
 
                                 } else {
                                     let uploadButton = window.top.document.getElementById("uploadButtonTwo");
-                                    uploadButton.style.display = "none";
+                                    //uploadButton.style.display = "none";
                                     container.style.background = '';
                                     container.style.transform = '';
+                                    Sharepoint._attachmentCounter--;
+                                }
+                                if (Sharepoint._attachmentCounter > 0) {
+                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                    uploadButton.style.display = "block";
+                                } else { //if counter is 0 or less, so we dont need to show button
+                                    uploadButton.style.display = "none";
+                                    console.log("counter is ", Sharepoint._attachmentCounter)
                                 }
                             };
                             //summaryDiv.className = "note-summary"; // <-- add this
@@ -2393,7 +2405,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             let errorText = await result.text();
                             throw new Error(`HTTP error ${result.status}: ${errorText}`);
                         }
-
+                        let uploadButton = window.top.document.getElementById("uploadButtonTwo");
                         let attachment = await result.json();
                         console.log("attachmentS feedback", attachment);
                         // Clear existing rows (including the "(Empty)" row)
@@ -2424,12 +2436,21 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     container.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
                                     container.style.transform = 'scale(1.02)';
                                     let uploadButton = window.top.document.getElementById("uploadButtonTwo");
-                                    uploadButton.style.display = "block";
+                                    Sharepoint._attachmentCounter++;
+                                  //  uploadButton.style.display = "block";
                                 } else {
                                     container.style.background = '';
                                     container.style.transform = '';
                                     let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    Sharepoint._attachmentCounter--;
+                                    //uploadButton.style.display = "none";
+                                }
+                                if (Sharepoint._attachmentCounter > 0) {
+                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                    uploadButton.style.display = "block";
+                                } else { //if counter is 0 or less, so we dont need to show button
                                     uploadButton.style.display = "none";
+                                    console.log("counter is ", Sharepoint._attachmentCounter)
                                 }
                             };
 
@@ -2472,7 +2493,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         section.appendChild(header);
 
                         checkboxes.each(function () {
-                            const container = this.closest(".note2-item") || this.closest(".email-item") || this.closest(".attachment-item");
+                            const container = this.closest(".note2-item") || this.closest(".email-row") || this.closest(".attachment-item");
 
                             const label = document.createElement("div");
                             label.className = "selected-item";
@@ -2480,21 +2501,35 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             const itemTitle = this.getAttribute("data-label") || this.value || "Unnamed Item";
 
                             let summaryText = "";
+
                             if (container) {
-                                const summaryEl = container.querySelector(".note2-summary, .email-summary, .attachment-summary");
-                                if (summaryEl) {
-                                    summaryText = summaryEl.textContent.trim();
+                                if (container.classList.contains("email-row")) {
+                                    // Extract from data attributes
+                                    const date = this.getAttribute("data-date") || "";
+                                    const address = this.getAttribute("data-address") || "";
+                                    const subject = this.getAttribute("data-subject") || "";
+                                    summaryText = `${date} - ${address} - ${subject}`;
+                                } else {
+                                    const summaryEl = container.querySelector(".note2-summary, .email-subject, .attachment-summary");
+                                    if (summaryEl) {
+                                        summaryText = summaryEl.textContent.trim();
+                                    } else if (container.classList.contains("attachment-item")) {
+                                        const labelEl = "";
+                                        if (labelEl) {
+                                            summaryText = labelEl.textContent.trim();
+                                        }
+                                    }
                                 }
                             }
 
-                            // Format: Title (summary text)
                             label.textContent = summaryText ? `${itemTitle}: ${summaryText}` : itemTitle;
-
                             section.appendChild(label);
                         });
 
                         FinalDiv.appendChild(section);
                     }
+
+
 
                     // Gather selected checkboxes
                     const selectedNotes = $("#notesDiv input[type='checkbox']:checked");
@@ -2525,9 +2560,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let checkedBoxes = $("#attachmentsDiv input[type='checkbox']:checked");
                     let notesBoxes = $("#notesDiv input[type='checkbox']:checked");
                     let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
+                    let folderName;
 
                     //let isChecked = $("#createSubfolder").prop("checked");
-                   // let url = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
+                    // let url = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
 
                     let AutomateSubfolderCreation = "true"; //by default it is true
                     console.log("AutomateSubfolderCreation is ", AutomateSubfolderCreation);
@@ -2588,7 +2624,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             let subject = $(emailbox).data("subject");
                             let address = $(emailbox).data("address");
                             let messageDate = $(emailbox).data("date");
-                            
+
 
                             let identifier = emailbox.dataset.attachmentId;
 
@@ -2967,20 +3003,31 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             // Attach the change handler directly
                             customRow.find(".email-checkbox").on("change", function () {
                                 if (this.checked) {
-                                    let uploadButton = window.top.document.getElementById("uploadButtonTwo");
-                                    uploadButton.style.display = "block";
+                                    //let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    //uploadButton.style.display = "block";
                                     customRow.css({
                                         background: 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))',
                                         transform: 'scale(1.02)'
                                     });
+                                    Sharepoint._attachmentCounter++
                                 } else {
-                                    let uploadButton = window.top.document.getElementById("uploadButtonTwo");
-                                    uploadButton.style.display = "none";
+                                    //let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                    //uploadButton.style.display = "none";
+                                    Sharepoint._attachmentCounter--;
                                     customRow.css({
                                         background: '',
                                         transform: ''
                                     });
                                 }
+                                let uploadButton = window.top.document.getElementById("uploadButtonTwo");
+                                if (Sharepoint._attachmentCounter > 0) {
+                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                    uploadButton.style.display = "block";
+                                } else { //if counter is 0 or less, so we dont need to show button
+                                    uploadButton.style.display = "none";
+                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                }
+
                             });
                             $("#emailsDiv").append(customRow);
                         });
@@ -3037,7 +3084,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         name = folderName //if name is empty then we can set a default name
 
 
-                    } 
+                    }
                     console.log("name is ", folderName)
 
                     try {
@@ -3140,7 +3187,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
                     //// let containerDiv = document.createElement("div");
-                    //let containerDiv = $("<div></div>"); 
+                    //let containerDiv = $("<div></div>");
 
                     //// Create section containers
                     //let attachmentsSection = $("<div><h3>Attachments</h3></div>");
@@ -3590,7 +3637,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("we cannot find attachments div")
                     }
                 },
-                
+
 
                 // Initialize the tree
                 //renderTree();
@@ -3611,11 +3658,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log("naming convention is ", namingConvention);
 
                     let url3 = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
-                    Sharepoint._AutomateSubfolderCreation = await(await fetch(_fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation")).text();
+                    Sharepoint._AutomateSubfolderCreation = await (await fetch(_fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation")).text();
 
-                    Sharepoint._SuggestDirectoryName = await(await fetch(_fullPluginPathHandler + "?endpoint=SuggestDirectoryName")).text();
+                    Sharepoint._SuggestDirectoryName = await (await fetch(_fullPluginPathHandler + "?endpoint=SuggestDirectoryName")).text();
 
-                    Sharepoint._createFolderOption = await(await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text();
+                    Sharepoint._createFolderOption = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text();
 
                     let itemsDiv = document.createElement("div");
                     itemsDiv.id = "itemsDiv";
@@ -3629,8 +3676,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     FinalDiv.style.display = "block";
                     FinalDiv.innerText = "hi this is the final div!";
                     let testDiv = document.createElement("div");
-                    testDiv.innerText = "test div";
-                    testDiv.id = "testDiv";
+                    testDiv.innerText = "SuccessDiv";
+                    testDiv.id = "successMessage";
 
                     let finalUploadButton = document.createElement("button");
                     finalUploadButton.innerText = "upload final";
@@ -3770,7 +3817,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemsDiv.appendChild(combineNotesBox);
                     console.log("items div is ", itemsDiv);
 
-                    
+
 
                     //let eventElement = eventTarget);
                     if (!this._pluginWindow) {
@@ -3819,7 +3866,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
 
 
-                     //   console.log("directory window is ", directoryWindow)
+                        //   console.log("directory window is ", directoryWindow)
                         this._renderElement();
                         //this._getAllAttachments();
                         //this._getAllNotes();
@@ -3858,7 +3905,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             //console.log("this is ", this._attachmentsWindow);
                             self._attachmentsWindow._closeButtonElement_click();
 
-                            
+
                         } else {
                             console.log("current paqth is not empty")
 
@@ -3867,11 +3914,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     };
                     itemsDiv.appendChild(uploadButtonTwo);
-                    uploadButtonTwo.style.display = "none"; //hide it 
+                    uploadButtonTwo.style.display = "none"; //hide it
                     //this.finalWindow.render();
-                   // this.finalWindow.centerToViewport();
-                  //  this.finalWindow.show();
-                    
+                    // this.finalWindow.centerToViewport();
+                    //  this.finalWindow.show();
+
                     //this.finalWindow.centerToViewport();
                     this._getAllEmails();
 
@@ -3901,7 +3948,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
 
 
-                    
+
                     let directoryWindow = $("#ct100_overlay_id4");
                     let attachmentWindowButton = $("#AttachmentsPage");
                     attachmentWindowButton.on("click", function (e) {
@@ -3943,7 +3990,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
-                    
+
                     directoryWindow.hide();
                 },
 
