@@ -1222,7 +1222,9 @@
                         hiddenInput.value = "None"; // Default value
 
 
-
+                        let alertDiv = document.createElement("div");
+                        alertDiv.id = alertDiv;
+                        
 
 
                         // Update hidden input when dropdown changes
@@ -1242,12 +1244,34 @@
                             console.log("selected value is ", selectedValue);
                             hiddenBox.text(selectedValue);
                             hiddenBox.val(selectedValue);
+                            let customAttribute = ""
+
+                            fetch(_fullPluginPathHandler + '?endpoint=customAttribute')
+                                .then(response => response.json())
+                                .then(data => {
+                                    // Handle your data here
+                                    customAttribute = data;
+                                    console.log(data);
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                });
+
+
+                            if (selectedValue.includes("CustomAttribute") && customAttribute === null || selectedValue.includes("CustomAttribute") && customAttribute === "") {
+                                console.log("please enter a custom attribute")
+                                alertDiv.innerText = "please enter a custom attribute";
+                                alertDiv.style.color = "red";
+                                return
+                            } else {
+                                let fakeButton = $("#ctl00_ctl00_cph_apply_fakeApplyButton");
+                                fakeButton.click();
+                            }
 
                             // Update the hidden input with selected value
                             hiddenInput.value = selectedValue;
 
-                            let fakeButton = $("#ctl00_ctl00_cph_apply_fakeApplyButton");
-                            fakeButton.click();
+                            
 
                             // Create visible text input
                             let textInput = document.createElement("input");
@@ -1297,6 +1321,7 @@
                         formSpan.appendChild(nameDropdown);
                         formSpan.appendChild(hiddenInput); // Add hidden input to form
                         formSpan.appendChild(applyButton);
+                        formSpan.appendChild(alertDiv);
 
                         // Append to the container - make sure it's inside the form
                         globalSettingsDiv.append(formSpan);
