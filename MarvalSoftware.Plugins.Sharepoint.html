@@ -2527,15 +2527,22 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
 
                     //let isChecked = $("#createSubfolder").prop("checked");
-                    let url = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
+                   // let url = _fullPluginPathHandler + "?endpoint=AutomateSubfolderCreation";
 
                     let AutomateSubfolderCreation = "true"; //by default it is true
                     console.log("AutomateSubfolderCreation is ", AutomateSubfolderCreation);
 
-                    let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text(); //now we can get naming convention from bafckend
-                    console.log("naming convention is ", namingConvention);
-                    let folderName = "";
+                    //console.log("combined content is ", combinedContent);
+                    //let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadCombinedNotes&reqId=" + reqId;
+                    let customAttribute = await Sharepoint._getAllCustomAttributeValue();
 
+                    console.log("custom att is ", customAttribute);
+                    if (customAttribute === null) {
+                        customAttribute = "";
+                    }
+
+                    let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")); //now we can get naming convention from bafckend
+                    console.log("naming convention is ", namingConvention);
                     switch (namingConvention) { //set name based on the convention
                         case "MSM":
                             folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
@@ -2546,9 +2553,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         case "MSMAndCustomAttribute":
                             folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
                             break
-                        default:
-                            AutomateSubfolderCreation = "false";
-                            break;
                     }
 
 
@@ -2664,28 +2668,28 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             }
 
 
-                            console.log("combined content is ", combinedContent);
+                            //console.log("combined content is ", combinedContent);
                             let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadCombinedNotes&reqId=" + reqId;
-                            let customAttribute = await Sharepoint._getAllCustomAttributeValue();
+                            //let customAttribute = await Sharepoint._getAllCustomAttributeValue();
 
-                            console.log("custom att is ", customAttribute);
-                            if (customAttribute === null) {
-                                customAttribute = "";
-                            }
+                            //console.log("custom att is ", customAttribute);
+                            //if (customAttribute === null) {
+                            //    customAttribute = "";
+                            //}
 
-                            let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")); //now we can get naming convention from bafckend
-                            console.log("naming convention is ", namingConvention);
-                            switch (namingConvention) { //set name based on the convention
-                                case "MSM":
-                                    folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
-                                    break
-                                case "Custom Attribute":
-                                    folderName = customAttribute;
-                                    break
-                                case "MSMAndCustomAttribute":
-                                    folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
-                                    break
-                            }
+                            //let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")); //now we can get naming convention from bafckend
+                            //console.log("naming convention is ", namingConvention);
+                            //switch (namingConvention) { //set name based on the convention
+                            //    case "MSM":
+                            //        folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
+                            //        break
+                            //    case "Custom Attribute":
+                            //        folderName = customAttribute;
+                            //        break
+                            //    case "MSMAndCustomAttribute":
+                            //        folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
+                            //        break
+                            //}
 
                             let payload = {
                                 microsoftToken: Sharepoint._microsoftToken,
@@ -3599,6 +3603,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log(document.location.search);
                     let url = (new URLSearchParams(window.top.location.search)).get("id");
                     console.log(url);
+
+                    let customAttribute = await (await fetch(_fullPluginPathHandler + "?endpoint=customAttribute")).text();
+                    //now need to search for it
 
                     let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text(); //now we can get naming convention from bafckend
                     console.log("naming convention is ", namingConvention);
