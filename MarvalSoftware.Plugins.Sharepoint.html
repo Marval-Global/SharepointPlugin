@@ -28,6 +28,7 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             animation: fadeInUp 0.8s ease-out;*/
+        
 
         .mini-create-btn {
             background-color: white !important;
@@ -135,7 +136,7 @@
             background: linear-gradient(135deg, rgba(50, 192, 240, 0.1), rgba(120, 103, 173, 0.1));
             border: 1px solid rgba(50, 192, 240, 0.2);
             border-radius: 8px;
-            padding: 12px;
+            padding: 8px;
             margin-bottom: 8px;
             transition: all 0.3s ease;
             position: relative;
@@ -289,7 +290,7 @@
             color: #333;
             cursor: pointer;
             transition: color 0.3s ease;
-            font-size: 14px;
+            font-size: 12px;
         }
 
             label:hover {
@@ -299,7 +300,7 @@
         .note2-summary {
             margin-left: 26px;
             color: #666;
-            font-size: 12px;
+            font-size: 10px;
             margin-top: 6px;
             font-style: italic;
         }
@@ -346,7 +347,7 @@
             animation: gradientShift 3s ease infinite;
         }
 
-        #saveButton {
+        .colourfulButton {
             height: 40px;
             background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
             background-size: 300% 300%;
@@ -443,16 +444,16 @@
             display:flex;
         }*/
         #itemsDiv {
-            margin-top: 20px;
+/*            margin-top: 20px;*/
             display: block; /* or 'flex' if needed for layout */
             width: auto;
-            height: auto;
+            height: 700px;
             max-width: 100%;
-            max-height: 100%;
+            max-height: 700px;
             overflow: auto; /* adds scrollbars if content overflows */
             box-sizing: border-box; /* ensures padding doesn't overflow container */
-            margin: 15px;
-            padding: 20px;
+/*            margin: 15px;*/
+            padding: 10px;
         }
 
 
@@ -925,8 +926,8 @@
     <div id="selectedFolder">Current Folder Path</div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
     <!--<input type="checkbox" id="createSubfolder"/>-->
-    <button id="saveButton">Save Path</button>
-    <button id="AttachmentsPage">Attachments Page</button>
+    <button id="saveButton" class="colourfulButton">Save Path</button>
+    <button id="AttachmentsPage" class="colourfulButton">Attachments Page</button>
 
 
 </template>
@@ -1236,12 +1237,12 @@
                         let applyButton = document.createElement("button");
                         applyButton.id = "applyButton";
                         applyButton.type = "button"; // Prevent form submission
-                        applyButton.textContent = "Apply";
+                        applyButton.textContent = "Save";
 
                         applyButton.addEventListener("click", function () {
                             let selectedValue = nameDropdown.value;
 
-                            console.log("selected value is ", selectedValue);
+                            //console.log("selected value is ", selectedValue);
                             hiddenBox.text(selectedValue);
                             hiddenBox.val(selectedValue);
                             let customAttribute = ""
@@ -1256,11 +1257,11 @@
                                 .catch(error => {
                                     console.error('Error:', error);
                                 });
-
+                            console.log("selected value is ", selectedValue, " and custom attribute input is ", customAttribute);
 
                             if (selectedValue.includes("CustomAttribute") && customAttribute === null || selectedValue.includes("CustomAttribute") && customAttribute === "") {
                                 console.log("please enter a custom attribute")
-                                alertDiv.innerText = "please enter a custom attribute";
+                                alertDiv.innerText = "please enter a custom attribute, and after please click the apply button";
                                 alertDiv.style.color = "red";
                                 return
                             } else {
@@ -2507,6 +2508,17 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         return;
                     }
 
+                    // Use a consistent container for dynamic content
+                    let contentContainer = window.top.document.getElementById("finalItemsContainer");
+                    if (!contentContainer) {//if container doesnt exist then we will create one!
+                        contentContainer = document.createElement("div");
+                        contentContainer.id = "finalItemsContainer";
+                        FinalDiv.insertBefore(contentContainer, FinalDiv.firstChild); // place it before buttons
+                    }
+
+                    // Clear dynamic content only
+                    contentContainer.innerHTML = "";
+
                     function _buildSection(title, checkboxes) {
                         if (checkboxes.length === 0) return;
 
@@ -2529,7 +2541,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                             if (container) {
                                 if (container.classList.contains("email-row")) {
-                                    // Extract from data attributes
                                     const date = this.getAttribute("data-date") || "";
                                     const address = this.getAttribute("data-address") || "";
                                     const subject = this.getAttribute("data-subject") || "";
@@ -2538,11 +2549,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     const summaryEl = container.querySelector(".note2-summary, .email-subject, .attachment-summary");
                                     if (summaryEl) {
                                         summaryText = summaryEl.textContent.trim();
-                                    } else if (container.classList.contains("attachment-item")) {
-                                        const labelEl = "";
-                                        if (labelEl) {
-                                            summaryText = labelEl.textContent.trim();
-                                        }
                                     }
                                 }
                             }
@@ -2551,27 +2557,27 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             section.appendChild(label);
                         });
 
-                        FinalDiv.appendChild(section);
+                        contentContainer.appendChild(section);
                     }
-
-
 
                     // Gather selected checkboxes
                     const selectedNotes = $("#notesDiv input[type='checkbox']:checked");
                     const selectedEmails = $("#emailsDiv input[type='checkbox']:checked");
                     const selectedAttachments = $("#attachmentsDiv input[type='checkbox']:checked");
 
+                    // Add path text
                     let folderPath = Sharepoint._currentPath;
                     let pathDiv = document.createElement("div");
-                    pathDiv.innerText = folderPath;
+                    pathDiv.id = "pathDiv";
+                    pathDiv.innerText = "You selected " + folderPath;
+                    contentContainer.appendChild(pathDiv);
 
-                    FinalDiv.appendChild(pathDiv);
-
-                    // Build sections and append them
+                    // Append sections
                     _buildSection("📝 Selected Notes", selectedNotes);
                     _buildSection("📧 Selected Emails", selectedEmails);
                     _buildSection("📎 Selected Attachments", selectedAttachments);
                 },
+
                 _uploadAllAttachments: async function (sender, e) {
                     //e.preventDefault();
                     console.log("we are calling upload all attachments");
@@ -3694,12 +3700,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemsDiv.className = "body";
                     itemsDiv.style.display = "block";
 
-
                     let FinalDiv = document.createElement("div");
                     FinalDiv.id = "FinalDiv";
                     FinalDiv.className = "body";
                     FinalDiv.style.display = "block";
-                    FinalDiv.innerText = "hi this is the final div!";
+                    //FinalDiv.innerText = "hi this is the final div!";
+
                     let testDiv = document.createElement("div");
                     testDiv.innerText = "SuccessDiv";
                     testDiv.id = "successMessage";
@@ -3707,11 +3713,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let finalUploadButton = document.createElement("button");
                     finalUploadButton.innerText = "upload final";
                     finalUploadButton.id = "finalButton";
+                    finalUploadButton.className = "colourfulButton";
                     FinalDiv.appendChild(finalUploadButton);
 
                     let goBack = document.createElement("button");
                     goBack.innerText = "go back final";
                     goBack.id = "goBack";
+                    goBack.className = "colourfulButton";
                     FinalDiv.appendChild(goBack);
 
                     finalUploadButton.onclick = function (e) {
@@ -3727,7 +3735,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         self.finalWindow._closeButtonElement_click();
                     }
 
-                    FinalDiv.appendChild(testDiv);
+                    //FinalDiv.appendChild(testDiv);
 
                     function createSection(headerText, contentId) {
                         let section = document.createElement("div");
@@ -3845,12 +3853,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
                     //let eventElement = eventTarget);
-                    if (!this._pluginWindow) {
+                    if (!this._pluginWindow) { //this is the directory window
                         this._pluginWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
                             title: "Sharepoint",
-                            height: 1000,
-                            width: 1000,
+                            height: 750,
+                            width: 750,
                             minHeight: 700,
                             minWidth: 432,
                             isResizable: true,
@@ -3865,10 +3873,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this._attachmentsWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
                             title: "Attachments",
-                            height: 1000,
-                            width: 1000,
+                            height: 760,
+                            width: 750,
                             minHeight: 300,
                             minWidth: 300,
+                            maxHeight:750,
                             isResizable: true,
                             isMaximizable: true,
                             bodyElement: itemsDiv,
@@ -3880,8 +3889,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this.finalWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
                             title: "Window",
-                            height: 1000,
-                            width: 1000,
+                            height: 750,
+                            width: 750,
                             minHeight: 300,
                             minWidth: 300,
                             isResizable: true,
