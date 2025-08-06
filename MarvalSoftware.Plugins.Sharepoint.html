@@ -325,6 +325,15 @@
             margin: 15px;
             animation: gradientShift 3s ease infinite;
         }
+        #uploadButtonTwo.disabled {
+            background: gray !important;
+            background-size: initial;
+            box-shadow: none;
+           
+            opacity: 0.6;
+            animation: none;
+        }
+
         /* Upload Button */
         #uploadButtonTwo {
             height: 40px;
@@ -924,10 +933,12 @@
 
 
     <div id="selectedFolder">Current Folder Path</div>
+    <div id="statusDiv">Status is </div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
     <!--<input type="checkbox" id="createSubfolder"/>-->
     <button id="saveButton" class="colourfulButton">Save Path</button>
     <button id="AttachmentsPage" class="colourfulButton">Attachments Page</button>
+    
 
 
 </template>
@@ -2369,12 +2380,16 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     Sharepoint._attachmentCounter--;
                                 }
                                 if (Sharepoint._attachmentCounter > 0) {
-                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                    console.log("counter is ", Sharepoint._attachmentCounter);
                                     uploadButton.style.display = "block";
-                                } else { //if counter is 0 or less, so we dont need to show button
-                                    uploadButton.style.display = "none";
-                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                    uploadButton.classList.remove("disabled");
+                                    uploadButton.disabled = false;
+                                } else {
+                                    console.log("counter is ", Sharepoint._attachmentCounter);
+                                    uploadButton.classList.add("disabled");
+                                    uploadButton.disabled = true;
                                 }
+
                             };
                             //summaryDiv.className = "note-summary"; // <-- add this
                             //checkbox.style.marginRight = "8px";
@@ -2533,7 +2548,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             const container = this.closest(".note2-item") || this.closest(".email-row") || this.closest(".attachment-item");
 
                             const label = document.createElement("div");
-                            label.className = "selected-item";
+                            label.className = "note2-item";
 
                             const itemTitle = this.getAttribute("data-label") || this.value || "Unnamed Item";
 
@@ -3095,7 +3110,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         case "MSM":
                             folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
                             break
-                        case "Custom Attribute":
+                        case "CustomAttribute":
                             folderName = customAttribute;
                             break
                         case "MSMAndCustomAttribute":
@@ -3817,6 +3832,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     // Create and append Emails section
                     let emailsSection = createSection("📧 Emails", "emailsDiv");
+
                     itemsDiv.appendChild(emailsSection);
 
                     // Create and append Attachments section
@@ -3927,28 +3943,28 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     uploadButtonTwo.onclick = function (e) {//when we click upload all
                         e.preventDefault();
                         console.log("current path is and we are calling prevenmt default ", Sharepoint._currentPath)
-                        if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
-                            console.log("current pRTH IS NUbuefdueuhehuieihjeLL hi")
-                            let directoryWindow = $("#ct100_overlay_id4");
-                            directoryWindow.css("z-index", 1000000);
-                            directoryWindow.show();
-                            self._pluginWindow.centerToViewport();
-                            console.log("should be displaying all attachments")
-                            //Sharepoint._displaySelectedAttachments();
-                            //this = window.top.document.getElementById("ct100_overlay_id5");
-                            //console.log("this is ", this._attachmentsWindow);
-                            self._attachmentsWindow._closeButtonElement_click();
-
-
-                        } else {
-                            console.log("current paqth is not empty")
-
-                            //Sharepoint._uploadAllAttachments(e);we can do this on the other window
-                        }
+                        console.log("current pRTH IS NUbuefdueuhehuieihjeLL hi")
+                        let directoryWindow = $("#ct100_overlay_id4");
+                        directoryWindow.css("z-index", 1000000);
+                        directoryWindow.show();
+                        self._pluginWindow.centerToViewport();
+                        console.log("should be displaying all attachments")
+                        //Sharepoint._displaySelectedAttachments();
+                        //this = window.top.document.getElementById("ct100_overlay_id5");
+                        //console.log("this is ", this._attachmentsWindow);
+                        self._attachmentsWindow._closeButtonElement_click();
 
                     };
                     itemsDiv.appendChild(uploadButtonTwo);
-                    uploadButtonTwo.style.display = "none"; //hide it
+
+                    uploadButtonTwo.disabled = true; // disables it
+                    uploadButtonTwo.style.backgroundColor = "gray"; // grays it out
+                    uploadButtonTwo.classList.add("disabled");
+                    //uploadButtonTwo.style.cursor = "not-allowed"; // optional UX improvement
+                    uploadButtonTwo.style.opacity = "0.6"; // optional, makes it look visually "disabled"
+
+                    //uploadButtonTwo.style.display = "none"; //hide it
+                    //uploadButtonTwo.style.backgroundColor = "gray";
                     //this.finalWindow.render();
                     // this.finalWindow.centerToViewport();
                     //  this.finalWindow.show();
@@ -3967,15 +3983,32 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (uploadButton.length > 0) {
                         console.log("can find upload button")
                         uploadButton.on("click", function (e) {
-                            console.log("clicking on button")
-                            e.preventDefault();
-                            //Sharepoint._appendSelectedItemsToFinalDiv();
-                            //seems that we need to  render second window then open third window
-                            self.finalWindow.render();
-                            self.finalWindow.centerToViewport();
-                            self.finalWindow.show();
-                            Sharepoint._appendSelectedItemsToFinalDiv();
-                            self._pluginWindow._closeButtonElement_click();
+                            e.preventDefault()
+                            if (Sharepoint._currentPath === null || Sharepoint._currentPath === "") {
+                                //should create this in popup 
+                                let statusDiv = window.top.document.getElementById("statusDiv")
+                                statusDiv.innerText = "Please select a folder ";
+                                statusDiv.id = "statusDiv";
+                                statusDiv.style.color = "red"
+                                //let treeWindow = window.top.document.getElementById("ct100_overlay_id4");
+                                //treeWindow.appendChild(statusDiv);
+                                console.log("please select a path")
+                                return
+                            } else {
+                                console.log("clicking on button")
+                                //e.preventDefault();
+                                //Sharepoint._appendSelectedItemsToFinalDiv();
+                                //seems that we need to  render second window then open third window
+                                self.finalWindow.render();
+                                self.finalWindow.centerToViewport();
+                                self.finalWindow.show();
+                                Sharepoint._appendSelectedItemsToFinalDiv();
+                                self._pluginWindow._closeButtonElement_click();
+                            }
+
+
+
+                            
                         });
                     } else {
                         console.warn("#saveButton not found at the time of binding.");
