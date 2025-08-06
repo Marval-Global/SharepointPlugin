@@ -2379,7 +2379,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     container.style.transform = '';
                                     Sharepoint._attachmentCounter--;
                                 }
-                                if (Sharepoint._attachmentCounter > 0) {
+                                if (Sharepoint._attachmentCounter > 0) {//for graying my button
                                     console.log("counter is ", Sharepoint._attachmentCounter);
                                     uploadButton.style.display = "block";
                                     uploadButton.classList.remove("disabled");
@@ -2486,12 +2486,22 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     Sharepoint._attachmentCounter--;
                                     //uploadButton.style.display = "none";
                                 }
-                                if (Sharepoint._attachmentCounter > 0) {
-                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                //if (Sharepoint._attachmentCounter > 0) {
+                                //    console.log("counter is ", Sharepoint._attachmentCounter)
+                                //    uploadButton.style.display = "block";
+                                //} else { //if counter is 0 or less, so we dont need to show button
+                                //    uploadButton.style.display = "none";
+                                //    console.log("counter is ", Sharepoint._attachmentCounter)
+                                //}
+                                if (Sharepoint._attachmentCounter > 0) {//for graying my button
+                                    console.log("counter is ", Sharepoint._attachmentCounter);
                                     uploadButton.style.display = "block";
-                                } else { //if counter is 0 or less, so we dont need to show button
-                                    uploadButton.style.display = "none";
-                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                    uploadButton.classList.remove("disabled");
+                                    uploadButton.disabled = false;
+                                } else {
+                                    console.log("counter is ", Sharepoint._attachmentCounter);
+                                    uploadButton.classList.add("disabled");
+                                    uploadButton.disabled = true;
                                 }
                             };
 
@@ -3066,12 +3076,22 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                     });
                                 }
                                 let uploadButton = window.top.document.getElementById("uploadButtonTwo");
-                                if (Sharepoint._attachmentCounter > 0) {
-                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                //if (Sharepoint._attachmentCounter > 0) {
+                                //    console.log("counter is ", Sharepoint._attachmentCounter)
+                                //    uploadButton.style.display = "block";
+                                //} else { //if counter is 0 or less, so we dont need to show button
+                                //    uploadButton.style.display = "none";
+                                //    console.log("counter is ", Sharepoint._attachmentCounter)
+                                //}
+                                if (Sharepoint._attachmentCounter > 0) {//for graying my button
+                                    console.log("counter is ", Sharepoint._attachmentCounter);
                                     uploadButton.style.display = "block";
-                                } else { //if counter is 0 or less, so we dont need to show button
-                                    uploadButton.style.display = "none";
-                                    console.log("counter is ", Sharepoint._attachmentCounter)
+                                    uploadButton.classList.remove("disabled");
+                                    uploadButton.disabled = false;
+                                } else {
+                                    console.log("counter is ", Sharepoint._attachmentCounter);
+                                    uploadButton.classList.add("disabled");
+                                    uploadButton.disabled = true;
                                 }
 
                             });
@@ -3939,7 +3959,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._attachmentsWindow.centerToViewport();
                     let uploadButtonTwo = document.createElement("button");
                     uploadButtonTwo.id = "uploadButtonTwo";
-                    uploadButtonTwo.innerHTML = "🚀 Upload all22";
+                    uploadButtonTwo.innerHTML = "🚀 Upload all attachments";
                     uploadButtonTwo.onclick = function (e) {//when we click upload all
                         e.preventDefault();
                         console.log("current path is and we are calling prevenmt default ", Sharepoint._currentPath)
