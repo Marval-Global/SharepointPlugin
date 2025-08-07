@@ -772,11 +772,26 @@ public class Handler : PluginHandler
                 }
                 else if (getParamVal == "createUploadNote")
                 {
+                    string requestBody;
+                    var identifer = context.Request.QueryString["identifier"];
+                    var reqId = context.Request.QueryString["reqId"];
+                    var attachmentName = context.Request.QueryString["attachmentName"];
+                    //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
+                    using (var reader = new StreamReader(context.Request.InputStream))
+                    {
+                        requestBody = reader.ReadToEnd();//read contents from body in frontend
+                    }
+                    dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+                        //var webUrl = parsedBody.webUrl;
+                        string webUrl = HttpUtility.UrlDecode((string)parsedBody.webUrl);
+
                     var reqNum = context.Request.QueryString["reqId"];
-                    AddMsmNote(Int32.Parse(reqNum), "Successfully uploaded all attachments!");
+                        //var webUrl = context.Request.QueryString["webUrl"];
+                        Log.Information("weburl is right now " + webUrl);
+                    AddMsmNote(Int32.Parse(reqNum), "successfully uploaded, you can see it here: " + webUrl);
                 }
 
-
+                 
                 else if (getParamVal == "uploadEmail") //upload attachment
                 {
                     Log.Information("we are in if");
