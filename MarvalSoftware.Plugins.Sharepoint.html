@@ -28,8 +28,19 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             animation: fadeInUp 0.8s ease-out;*/
-        
 
+       
+
+        #pathDiv {
+            margin: auto;
+            display: block;
+            color: darkblue;
+            border-radius: 10px;
+            border: 3px solid #32C0F0;
+            width:50%;
+        }
+        
+        
         .mini-create-btn {
             background-color: white !important;
         }
@@ -71,6 +82,14 @@
             height: 40px;
             border-radius: 15px;
             font-family: 'Inter', sans-serif;
+        }
+
+        #statusDiv{
+            height: 30px !important;
+            width: 45% !important;
+            display:block;
+            margin:auto;
+            display:none;
         }
 
         #content {
@@ -330,6 +349,13 @@
             background-size: initial;
             box-shadow: none;
            
+            opacity: 0.6;
+            animation: none;
+        }
+        .disabled {
+            background: gray !important;
+            background-size: initial;
+            box-shadow: none;
             opacity: 0.6;
             animation: none;
         }
@@ -933,10 +959,10 @@
 
 
     <div id="selectedFolder">Current Folder Path</div>
-    <div id="statusDiv">Status is </div>
+    <div id="statusDiv" class="colourfulButton">Status is </div>
     <!--<div id="attachmentsDiv" style="display: none;"></div>-->
     <!--<input type="checkbox" id="createSubfolder"/>-->
-    <button id="saveButton" class="colourfulButton">Save Path</button>
+    <button id="saveButton" class="colourfulButton disabled">Save Path</button>
     <button id="AttachmentsPage" class="colourfulButton">Attachments Page</button>
     
 
@@ -2594,13 +2620,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let folderPath = Sharepoint._currentPath;
                     let pathDiv = document.createElement("div");
                     pathDiv.id = "pathDiv";
-                    pathDiv.innerText = "You selected " + folderPath;
+                    pathDiv.innerText = "You are uploading to the path: " + folderPath;
                     contentContainer.appendChild(pathDiv);
 
                     // Append sections
-                    _buildSection("📝 Selected Notes", selectedNotes);
-                    _buildSection("📧 Selected Emails", selectedEmails);
-                    _buildSection("📎 Selected Attachments", selectedAttachments);
+                    _buildSection("Selected Notes", selectedNotes);
+                    _buildSection("Selected Emails", selectedEmails);
+                    _buildSection("Selected Attachments", selectedAttachments);
                 },
 
                 _uploadAllAttachments: async function (sender, e) {
@@ -3490,6 +3516,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         Sharepoint._prevId = Sharepoint._currentSelectedFolderId;
                         Sharepoint._currentSelectedFolderId = item.id;
                         Sharepoint._currentPath = folderPaths[item.id];
+                        $("#statusDiv").hide();
+                        let saveButton = window.top.document.getElementById("saveButton");
+                        saveButton.classList.remove("disabled");
 
                         // Update the selected folder display
                         let text = "Current Selected Path is: " + Sharepoint._currentPath;
@@ -3746,13 +3775,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     testDiv.id = "successMessage";
 
                     let finalUploadButton = document.createElement("button");
-                    finalUploadButton.innerText = "upload final";
+                    finalUploadButton.innerText = "Upload";
                     finalUploadButton.id = "finalButton";
                     finalUploadButton.className = "colourfulButton";
                     FinalDiv.appendChild(finalUploadButton);
 
                     let goBack = document.createElement("button");
-                    goBack.innerText = "go back final";
+                    goBack.innerText = "Go Back";
                     goBack.id = "goBack";
                     goBack.className = "colourfulButton";
                     FinalDiv.appendChild(goBack);
@@ -3876,7 +3905,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     // Create a label for the checkbox
                     let combineLabel = document.createElement("label");
                     combineLabel.htmlFor = "combineNotesCheckbox";
-                    combineLabel.innerText = "🧩 Combine Notes";
+                    combineLabel.innerText = "Combine Notes";
 
                     // Append checkbox and label to the container div
                     combineNotesBox.appendChild(combineCheckbox);
@@ -3959,7 +3988,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._attachmentsWindow.centerToViewport();
                     let uploadButtonTwo = document.createElement("button");
                     uploadButtonTwo.id = "uploadButtonTwo";
-                    uploadButtonTwo.innerHTML = "🚀 Upload all attachments";
+                    uploadButtonTwo.innerHTML = "Upload all attachments";
                     uploadButtonTwo.onclick = function (e) {//when we click upload all
                         e.preventDefault();
                         console.log("current path is and we are calling prevenmt default ", Sharepoint._currentPath)
@@ -3981,7 +4010,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     uploadButtonTwo.style.backgroundColor = "gray"; // grays it out
                     uploadButtonTwo.classList.add("disabled");
                     //uploadButtonTwo.style.cursor = "not-allowed"; // optional UX improvement
-                    uploadButtonTwo.style.opacity = "0.6"; // optional, makes it look visually "disabled"
+                    //uploadButtonTwo.style.opacity = "0.6"; // optional, makes it look visually "disabled"
 
                     //uploadButtonTwo.style.display = "none"; //hide it
                     //uploadButtonTwo.style.backgroundColor = "gray";
@@ -4010,6 +4039,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 statusDiv.innerText = "Please select a folder ";
                                 statusDiv.id = "statusDiv";
                                 statusDiv.style.color = "red"
+                                statusDiv.style.display = "block"
+                                
                                 //let treeWindow = window.top.document.getElementById("ct100_overlay_id4");
                                 //treeWindow.appendChild(statusDiv);
                                 console.log("please select a path")
