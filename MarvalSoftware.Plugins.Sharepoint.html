@@ -1182,6 +1182,7 @@
                 _isLoginInProgress: false,
                 _loginPromise: null,
                 _attachmentCounter: 0,
+                _folderUrl:"",
                 // Sharepoint: null,
 
 
@@ -2694,6 +2695,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             console.log("case msmca")
                             folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
                             break
+                        default:
+                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
+                            AutomateSubfolderCreation == "false";
+                            break;
                     }
 
 
@@ -2765,6 +2770,19 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                 let response = await result.json();
                                 console.log(`Uploaded email: ${subject}`, response);
+                                //const parsedResponse = JSON.parse(response.response);
+
+                                // Step 2: Access the webUrl
+                                const fileWebUrl = response.webUrl; //we are parsing the response of result
+
+                                //console.log("File web URL:", fileWebUrl);
+                                const folderWebUrl = fileWebUrl.substring(0, fileWebUrl.lastIndexOf("/"));
+
+                                console.log("folder url is now ", folderWebUrl)
+                                Sharepoint._folderUrl = folderWebUrl;
+
+                                console.log("folder url is now ", folderWebUrl)
+                                $("#successMessage").text("Uploaded combined notes").fadeIn("slow").delay(2000).fadeOut("slow").css("color", "green");
                                 $("#successMessage")
                                     .text("Successfully uploaded emails")
                                     .css("color", "green")
@@ -2857,6 +2875,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                 let response = await result.json();
                                 console.log("Combined upload successful", response);
+                                // Step 1: Parse the response string
+                                //const parsedResponse = JSON.parse(result.response);
+
+                                const parsedResponse = JSON.parse(response.response);
+
+                                // Step 2: Access the webUrl
+                                const fileWebUrl = parsedResponse.webUrl; //we are parsing the response of result
+
+                                //console.log("File web URL:", fileWebUrl);
+                                const folderWebUrl = fileWebUrl.substring(0, fileWebUrl.lastIndexOf("/"));
+                                Sharepoint._folderUrl = folderWebUrl;
+
+
+                                console.log("folder url is now ", folderWebUrl)
                                 $("#successMessage").text("Uploaded combined notes").fadeIn("slow").delay(2000).fadeOut("slow").css("color", "green");
 
                             } catch (ex) {
@@ -2904,6 +2936,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                                     let response = await result.json();
                                     console.log(`Uploaded: ${attachmentName}`, response);
+
+                                    //const parsedResponse = JSON.parse(response.response);
+                                    
+                                    // Step 2: Access the webUrl
+                                    const fileWebUrl = response.webUrl; //we are parsing the response of result
+
+                                    //console.log("File web URL:", fileWebUrl);
+                                    const folderWebUrl = fileWebUrl.substring(0, fileWebUrl.lastIndexOf("/"));
+                                    Sharepoint._folderUrl = folderWebUrl;
+
+
+                                    console.log("folder url is now ", folderWebUrl)
+                                    $("#successMessage").text("Uploaded combined notes").fadeIn("slow").delay(2000).fadeOut("slow").css("color", "green");
+
                                     $("#successMessage")
                                         .text("Successfully uploaded notes")
                                         .fadeIn("slow")      // Fade in
@@ -2955,6 +3001,19 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 }
 
                                 let response = await result.json();
+                                //const parsedResponse = JSON.parse(response.response);
+
+                                // Step 2: Access the webUrl
+                                const fileWebUrl = response.webUrl; //we are parsing the response of result
+
+                                //console.log("File web URL:", fileWebUrl);
+                                const folderWebUrl = fileWebUrl.substring(0, fileWebUrl.lastIndexOf("/"));
+
+                                console.log("folder url is now ", folderWebUrl)
+                                Sharepoint._folderUrl = folderWebUrl;
+
+
+
                                 console.log(`Uploaded: ${attachmentName}`, response);
                                 $("#successMessage")
                                     .text("Successfully uploaded attachments")
@@ -2980,19 +3039,25 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
                         emailBoxes.each(function () {
                             $(this).prop("checked", false);
-                        });
+                        });//creating upload note hre
+                        console.log("note name is ", Sharepoint._folderUrl)
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createUploadNote&reqId=" + reqId;
+
                         let res = await fetch(url, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json; charset=utf-8"
                             },
-                            body: JSON.stringify({})
+                            body: JSON.stringify({
+                                webUrl: encodeURIComponent(Sharepoint._folderUrl)  // optional
+                            })
                         });
+
                         if (!res.ok) {
                             let errorText = await res.text();
                             throw new Error(`Error uploading}": ${res.status} - ${errorText}`);
                         }
+                        console.log("should have uploaded note")
                         //let response = await res.json();
                         console.log("Uploaded: successfully");
                         $("#successBox").show();
@@ -3188,6 +3253,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         case "MSMAndCustomAttribute":
                             folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
                             break
+                        default:
+                            folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
+                            //AutomateSubfolderCreation == "false";
+                            break;
                     }
                     //let name = ""
 
