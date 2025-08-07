@@ -29,6 +29,16 @@
             overflow: hidden;
             animation: fadeInUp 0.8s ease-out;*/
 
+        #successBox {
+            margin: auto;
+            display: block;
+            color: darkblue;
+            border-radius: 10px;
+            border: 3px solid #32C0F0;
+            width: 50%;
+            height: 30px;
+            text-align: center;
+        }
        
 
         #pathDiv {
@@ -38,6 +48,8 @@
             border-radius: 10px;
             border: 3px solid #32C0F0;
             width:50%;
+            height:30px;
+            text-align:center;
         }
         
         
@@ -2623,6 +2635,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     pathDiv.innerText = "You are uploading to the path: " + folderPath;
                     contentContainer.appendChild(pathDiv);
 
+                    let successBox = document.createElement("div");
+                    successBox.id = "successBox";
+                    successBox.innerText = "";
+                    successBox.style.display = "none";
+                    contentContainer.appendChild(successBox);
+
                     // Append sections
                     _buildSection("Selected Notes", selectedNotes);
                     _buildSection("Selected Emails", selectedEmails);
@@ -2659,16 +2677,21 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         customAttribute = "";
                     }
 
-                    let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")); //now we can get naming convention from bafckend
+                    let namingConvention = await (await fetch(_fullPluginPathHandler + "?endpoint=createFolderOption")).text(); //now we can get naming convention from bafckend
                     console.log("naming convention is ", namingConvention);
+                    console.log("req acrony and req num is  ", Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber);
                     switch (namingConvention) { //set name based on the convention
+
                         case "MSM":
+                            console.log("case msm")
                             folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber;
                             break
                         case "Custom Attribute":
+                            console.log("case ca")
                             folderName = customAttribute;
                             break
                         case "MSMAndCustomAttribute":
+                            console.log("case msmca")
                             folderName = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + "-" + customAttribute;
                             break
                     }
@@ -2676,6 +2699,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
                     if (AutomateSubfolderCreation === "true") { //so if none is selected in the textbox then we dont need to create a subfolder and upload all files normallly
+                        console.log("we are creating folder with name ", folderName);
                         let response = await Sharepoint._createFolder(folderName);//creating where we last clicked!
                         Sharepoint._currentPath += "/" + response.name;
 
@@ -2814,7 +2838,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                                 siteId: siteId,
                                 folderId: folderPath,
                                 combinedText: combinedContent,
-                                createSubfolder: isChecked,
+                                //createSubfolder: isChecked,
                                 attachmentName: folderName + " Combined Notes.txt"//we will use .trim after to condense it //should probably make this changable for the user
                             };
 
@@ -2971,6 +2995,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }
                         //let response = await res.json();
                         console.log("Uploaded: successfully");
+                        $("#successBox").show();
+                        $("#successBox").text("Uploaded attachments successfully!");
                         $("#uploadButtonTwo").hide();
                         $("#combineNotesCheckbox").prop("checked", false);
 
