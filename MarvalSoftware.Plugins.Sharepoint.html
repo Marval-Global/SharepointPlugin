@@ -124,7 +124,7 @@
         .section-header {
             background: linear-gradient(135deg, #32C0F0, #7867AD);
             color: white;
-            padding: 12px 20px;
+            padding: 5px;
             font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
@@ -167,7 +167,7 @@
             background: linear-gradient(135deg, rgba(50, 192, 240, 0.1), rgba(120, 103, 173, 0.1));
             border: 1px solid rgba(50, 192, 240, 0.2);
             border-radius: 8px;
-            padding: 8px;
+            padding: 6px;
             margin-bottom: 8px;
             transition: all 0.3s ease;
             position: relative;
@@ -201,7 +201,7 @@
             background: linear-gradient(135deg, rgba(226, 95, 148, 0.1), rgba(241, 93, 93, 0.1));
             border: 1px solid rgba(226, 95, 148, 0.2);
             border-radius: 8px;
-            padding: 12px;
+            padding: 5px;
             margin-bottom: 8px;
             display: grid;
             grid-template-columns: auto 130px 200px 1fr;
@@ -257,7 +257,7 @@
             background: linear-gradient(135deg, rgba(120, 103, 173, 0.1), rgba(226, 95, 148, 0.1));
             border: 1px solid rgba(120, 103, 173, 0.2);
             border-radius: 8px;
-            padding: 12px;
+            padding: 5px;
             margin-bottom: 8px;
             transition: all 0.3s ease;
             position: relative;
@@ -353,7 +353,7 @@
             box-shadow: 0 6px 12px rgba(50, 192, 240, 0.3);
             position: relative;
             overflow: hidden;
-            margin: 15px;
+            margin: 5px;
             animation: gradientShift 3s ease infinite;
         }
         #uploadButtonTwo.disabled {
@@ -435,6 +435,12 @@
             transform: translateY(0);
         }
 
+        .itemSection{
+            overflow:auto;
+            max-height:200px;
+            margin-bottom:5px;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .body {
@@ -502,7 +508,17 @@
 /*            margin: 15px;*/
             padding: 10px;
         }
+        /*#notesDiv {
+            height: 200px;*/ /* Instead of just max-height */
+            /*overflow-y: auto;
+            transition: 0.3s;
+            border: 1px solid #ccc;
+        }*/
 
+/*        #notesDiv{
+            overflow:scroll;
+            height:100px;
+        }*/
 
         /*#notesDiv,
         #attachmentsDiv, #emailsDiv {
@@ -3926,6 +3942,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         sectionContent.id = contentId;
                         sectionContent.style.transition = "all 0.3s ease";
                         sectionContent.style.overflow = "hidden";
+                        sectionContent.style.display = "none"; // <- Collapsed by default
+                        toggleButton.innerHTML = "▶"; // Arrow points right to indicate collapsed
+                        toggleButton.style.transform = "rotate(-90deg)"; // Optional: match arrow direction
+                        sectionHeader.title = "Click to expand";
 
                         // Toggle functionality
                         function toggleSection() {
@@ -3972,15 +3992,18 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     // Create and append Notes section
                     let notesSection = createSection("📝 Notes", "notesDiv");
+                    notesSection.id = "notesSection";
+                    notesSection.className = "itemSection";
                     itemsDiv.appendChild(notesSection);
 
                     // Create and append Emails section
                     let emailsSection = createSection("📧 Emails", "emailsDiv");
-
+                    emailsSection.className = "itemSection";
                     itemsDiv.appendChild(emailsSection);
 
                     // Create and append Attachments section
                     let attachmentsSection = createSection("📎 Attachments", "attachmentsDiv");
+                    attachmentsSection.className = "itemSection";
                     itemsDiv.appendChild(attachmentsSection);
 
 
@@ -4033,11 +4056,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this._attachmentsWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
                             title: "Attachments",
-                            height: 760,
+                            height: 750,
                             width: 750,
                             minHeight: 300,
                             minWidth: 300,
-                            maxHeight:750,
+                            maxHeight:50,
                             isResizable: true,
                             isMaximizable: true,
                             bodyElement: itemsDiv,
@@ -4083,7 +4106,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._attachmentsWindow.centerToViewport();
                     let uploadButtonTwo = document.createElement("button");
                     uploadButtonTwo.id = "uploadButtonTwo";
-                    uploadButtonTwo.innerHTML = "Upload all attachments";
+                    uploadButtonTwo.innerHTML = "Upload all attachments test";
                     uploadButtonTwo.onclick = function (e) {//when we click upload all
                         e.preventDefault();
                         console.log("current path is and we are calling prevenmt default ", Sharepoint._currentPath)
