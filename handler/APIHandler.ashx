@@ -346,10 +346,12 @@ public class Handler : PluginHandler
                     //     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", appToken);
                     //     context.Response.Write(ex);
                     // }}
-                }else if (getParamVal == "SuggestDirectoryName")
+                }
+                else if (getParamVal == "SuggestDirectoryName")
                 {
                     context.Response.Write(SuggestDirectoryName);
-                }else if (getParamVal == "createFolderOption")
+                }
+                else if (getParamVal == "createFolderOption")
                 {
                     context.Response.Write(createFolderOption);
                 }
@@ -357,7 +359,8 @@ public class Handler : PluginHandler
                 {
                     context.Response.Write(CustomAttribute);
 
-                } else if (getParamVal == "AutomateSubfolderCreation")
+                }
+                else if (getParamVal == "AutomateSubfolderCreation")
                 {
                     context.Response.Write(AutomateSubfolderCreation);
                 }
@@ -413,40 +416,86 @@ public class Handler : PluginHandler
                 else if (getParamVal == "SecretKey")
                 {
                     context.Response.Write("Hi");
-                } else if (getParamVal == "getAllNotes")
+                }
+                else if (getParamVal == "getAllNotes")
                 {
                     try
-                    {
-                        string requestBody;
-                        var identifer = context.Request.QueryString["identifier"];
-                        var reqId = context.Request.QueryString["reqId"];
-
-                        string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId + "/notes";
-                        Log.Information("url here is" + attachmentUrl);
-                        httpWebRequest = BuildRequest(attachmentUrl);
-                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
-                        httpWebRequest.Method = "GET";
-                        // Get the attachment data as byte array
-                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
-                        Log.Information("we are at line 367");
-
-                        if (attachmentData != null && attachmentData.Length > 0)
-                        {
-                            context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
-                            context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
-                        }
-                        else
-                        {
-                            Log.Warning("No attachment data received from MSM API");
-                            context.Response.Write("No attachment data found");
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error("Exception during attachment upload: " + e.Message, e);
-                        context.Response.Write("Error uploading file: " + e.Message);
-                    }
-                } else if (getParamVal == "getCustomAttributeValues")
+{
+    string requestBody;
+    var identifer = context.Request.QueryString["identifier"];
+    var reqId = context.Request.QueryString["reqId"];
+    string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId + "/notes";
+    Log.Information("url here is" + attachmentUrl);
+    
+    var allNotes = new List<JToken>(); // To collect all notes
+    string currentUrl = attachmentUrl;
+    
+    while (!string.IsNullOrEmpty(currentUrl))
+    {
+        httpWebRequest = BuildRequest(currentUrl);
+        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+        httpWebRequest.Method = "GET";
+        
+        // Get the attachment data as byte array
+        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+        Log.Information("Processing page with data length: " + attachmentData.Length);
+        
+        string jsonString = System.Text.Encoding.UTF8.GetString(attachmentData);
+        Log.Information("JSON Response: " + jsonString);
+        
+        // Parse the JSON
+        var jsonObject = JObject.Parse(jsonString);
+        
+        // Extract notes from current page
+        var currentPageNotes = jsonObject["collection"]["items"] as JArray;
+        if (currentPageNotes != null)
+        {
+            allNotes.AddRange(currentPageNotes);
+            Log.Information("Added " + currentPageNotes.Count + " notes from current page. Total: " + allNotes.Count);
+        }
+        
+        // Check for next page
+        var links = jsonObject["links"] as JArray;
+        JToken nextLink = null;
+        if (links != null)
+        {//first or default returns the first thing in a sequence, checks the array for a link[name] is equal to next
+            nextLink = links.FirstOrDefault(link => link["name"] != null && link["name"].ToString() == "next");
+        }
+        
+        if (nextLink != null && nextLink["href"] != null)//if there is a nextlink then we set cururl to it so we can continue the loop
+        {
+            currentUrl = nextLink["href"].ToString();
+        }
+        else
+        {
+            currentUrl = null;//loop will stop if its null
+        }
+        
+        string nextUrlLog = currentUrl != null ? currentUrl : "None - finished pagination";
+        Log.Information("Next URL: " + nextUrlLog);
+    }
+    
+    Log.Information("Finished pagination. Total notes collected: " + allNotes.Count);
+    
+    // Now return all notes as JSON
+    var result = new JObject();
+    result["collection"] = new JObject();
+    result["collection"]["items"] = new JArray(allNotes);
+    result["collection"]["totalItemCount"] = allNotes.Count;
+    
+    string finalJson = result.ToString();
+    byte[] finalData = System.Text.Encoding.UTF8.GetBytes(finalJson);
+    
+    context.Response.ContentType = "application/json";
+    context.Response.OutputStream.Write(finalData, 0, finalData.Length);
+}
+catch (Exception ex)
+{
+    Log.Error("Error in pagination: " + ex.Message);
+    // Handle error appropriately
+}
+                }
+                else if (getParamVal == "getCustomAttributeValues")
                 {
                     try
                     {
@@ -513,7 +562,8 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
-                } else if (getParamVal == "getAllEmails")
+                }
+                else if (getParamVal == "getAllEmails")
                 {
                     try
                     {//not even using this
@@ -782,16 +832,16 @@ public class Handler : PluginHandler
                         requestBody = reader.ReadToEnd();//read contents from body in frontend
                     }
                     dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
-                        //var webUrl = parsedBody.webUrl;
-                        string webUrl = HttpUtility.UrlDecode((string)parsedBody.webUrl);
+                    //var webUrl = parsedBody.webUrl;
+                    string webUrl = HttpUtility.UrlDecode((string)parsedBody.webUrl);
 
                     var reqNum = context.Request.QueryString["reqId"];
-                        //var webUrl = context.Request.QueryString["webUrl"];
-                        Log.Information("weburl is right now " + webUrl);
+                    //var webUrl = context.Request.QueryString["webUrl"];
+                    Log.Information("weburl is right now " + webUrl);
                     AddMsmNote(Int32.Parse(reqNum), "successfully uploaded, you can see it here: " + webUrl);
                 }
 
-                 
+
                 else if (getParamVal == "uploadEmail") //upload attachment
                 {
                     Log.Information("we are in if");
